@@ -19,6 +19,8 @@ Acceptance: host migration/preservation, isolation, context budget, invalid/trun
 
 ## File-chat extension — 2026-10-06
 
+Header background refinement: both chatbot views share a cream/mint backdrop extending upward through the shell's 16-point padding and actual top safe-area inset. Keep header controls below the safe area; extend decoration only. No top rounded gap or fixed device-height assumption. Welcome and other tabs remain unchanged.
+
 **Latest interaction override:** attachments belong inside the AI Buddy chatbot, not notebook screens. The attachment conversation now has the AI Buddy header, inline file cards and image/page previews, editable inline text check, chat bubbles and a bottom text/file/camera/send composer. “Attach to chat” replaces “Save to notebook”; no Sources/Study switch or Ask about files navigation. History opens a modal. Internal storage scopes reuse import/index services but are excluded from the regular notebook library. This supersedes the earlier navigation description below. File questions still use source-exact independent-question inference; this visual correction does not claim multimodal reasoning or unified general/file conversational memory.
 
 The supplied chat reference's attachment/camera controls are now functional in the Buddy tab, including hackathon V1. Reuse Ionicons, existing review UI and board 02's source-backed conversation; no new artwork or voice control. Cream/teal controls above the composer open File, Camera or Saved file chats. Native pickers launch from a mounted screen, not over an animating modal.

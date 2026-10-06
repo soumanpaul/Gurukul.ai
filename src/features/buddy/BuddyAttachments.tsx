@@ -11,6 +11,7 @@ import { TurnCard } from '../study/NotebookStudy';
 import type { StudyTurn } from '../../adapters/sqlite/study';
 import robot from '../../../docs/UX/12-digital-teacher-avatar.png';
 import { Action, styles } from '../shared/ui';
+import { BuddyBackdrop } from './BuddyBackdrop';
 
 const idle = { busy: false, progress: '', error: '' };
 const subscribe = () => () => {};
@@ -93,7 +94,8 @@ export function BuddyAttachments({ foundation, height, initial, close }: {
     });
   }
   const ready = sources.some(source => source.selected && source.status === 'ready');
-  return <View style={{ flex: 1, gap: 10, borderRadius: 24, backgroundColor: '#edf3e9', padding: 8 }}>
+  return <View style={{ flex: 1, gap: 10, padding: 8 }}>
+    <BuddyBackdrop />
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
       <Pressable accessibilityRole="button" accessibilityLabel="Back to AI Buddy" disabled={busy || !!review} onPress={close} style={{ minWidth: 48, minHeight: 48, justifyContent: 'center', alignItems: 'center' }}><Ionicons name="arrow-back" size={24} color="#086c70" /></Pressable>
       <Image source={robot} accessible={false} style={{ width: 40, height: 48 }} />

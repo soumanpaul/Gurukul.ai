@@ -12,6 +12,7 @@ import { Action, styles } from '../shared/ui';
 import robot from '../../../docs/UX/12-digital-teacher-avatar.png';
 import { BuddyWelcome } from './BuddyWelcome';
 import { BuddyAttachments } from './BuddyAttachments';
+import { BuddyBackdrop } from './BuddyBackdrop';
 
 const idle = { busy: false, chat: '', progress: '', error: '' };
 const subscribe = () => () => {};
@@ -77,7 +78,7 @@ export function BuddyScreen({ foundation, height, navigate }: { foundation: Foun
   if (!started) return <BuddyWelcome height={height} onStart={() => setStarted(true)}/>;
   if (attachments) return <BuddyAttachments foundation={foundation} height={height} initial={attachments} close={() => setAttachments(null)} />;
   return <View style={design.screen}>
-    <View pointerEvents="none" accessible={false} style={design.backdrop}><View style={design.mintGlow}/><View style={design.creamGlow}/></View>
+    <BuddyBackdrop />
     <View style={design.row}><Image source={robot} accessible={false} style={{ width: 48, height: 52 }}/><View style={{ flex: 1 }}><Text accessibilityRole="header" style={styles.heading}>AI Buddy</Text><Text style={design.note}>Your local study companion</Text></View>
       <Pressable accessibilityRole="button" accessibilityLabel="AI Buddy chat history" style={design.icon} disabled={busy} onPress={() => { Keyboard.dismiss(); setHistory(true); }}><Ionicons name="time-outline" size={24} color="#086c70" accessible={false}/></Pressable>
       <Pressable accessibilityRole="button" accessibilityLabel="New AI Buddy chat" style={design.icon} disabled={busy} onPress={() => { setChat(''); currentChat.current = ''; setTurns([]); setQuestion(''); setError(''); }}><Ionicons name="add" size={26} color="#086c70" accessible={false}/></Pressable>
@@ -114,9 +115,6 @@ export function BuddyScreen({ foundation, height, navigate }: { foundation: Foun
 
 const design = StyleSheet.create({
   screen: { gap: 10, flex: 1 }, row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  backdrop: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, overflow: 'hidden', borderRadius: 28, backgroundColor: '#edf3e9' },
-  mintGlow: { position: 'absolute', width: 360, height: 480, borderRadius: 180, backgroundColor: '#cde7df', top: '12%', right: -160 },
-  creamGlow: { position: 'absolute', width: 420, height: 420, borderRadius: 210, backgroundColor: '#f8eedb', left: -210, bottom: -100 },
   opaque: { backgroundColor: '#fffcf7' },
   robotHalo: { alignSelf: 'center', alignItems: 'center', justifyContent: 'center', borderRadius: 90, backgroundColor: '#b9ded4', borderWidth: 3, borderColor: '#ffffff', shadowColor: '#28796e', shadowOpacity: 0.16, shadowRadius: 18, shadowOffset: { width: 0, height: 4 } },
   greeting: { fontSize: 16, lineHeight: 24, color: '#193f3a', textAlign: 'center', marginBottom: 12 },
