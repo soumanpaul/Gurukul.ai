@@ -15,6 +15,54 @@ final class T7UITests: XCTestCase {
     }
   }
 
+  func testV1BuddyOnlyDemo() throws {
+    app.launch()
+    XCTAssertTrue(app.buttons["Next splash"].waitForExistence(timeout: 20))
+    finishSplash()
+    if app.textFields["Nickname"].waitForExistence(timeout: 3) { reach("Continue offline").tap() }
+    if app.staticTexts["Meet your digital teacher"].waitForExistence(timeout: 3) {
+      XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+      reach("Continue with my teacher").tap()
+    }
+    XCTAssertTrue(app.otherElements["AI Buddy"].firstMatch.waitForExistence(timeout: 15))
+    XCTAssertTrue(app.otherElements["Settings"].firstMatch.exists)
+    XCTAssertFalse(app.otherElements["Home"].firstMatch.exists)
+    XCTAssertFalse(app.otherElements["Progress"].firstMatch.exists)
+    XCTAssertFalse(app.buttons["View all notebooks"].exists)
+    if app.buttons["buddy-get-started"].waitForExistence(timeout: 3) { app.buttons["buddy-get-started"].tap() }
+    XCTAssertTrue(app.buttons["AI Buddy chat history"].waitForExistence(timeout: 10))
+    XCTAssertFalse(app.buttons["Practice"].exists)
+    XCTAssertFalse(app.buttons["Review practice"].exists)
+    XCTAssertTrue(app.buttons["Explore"].isHittable)
+    app.buttons["AI Buddy chat history"].tap()
+    XCTAssertTrue(app.buttons["Close chat history"].waitForExistence(timeout: 5))
+    app.buttons["Close chat history"].tap()
+    let buddy = XCTAttachment(screenshot: app.screenshot())
+    buddy.name = "V1 two-tab AI Buddy demo"
+    buddy.lifetime = .keepAlways
+    add(buddy)
+    app.otherElements["Settings"].firstMatch.tap()
+    XCTAssertTrue(app.buttons["Edit local profile"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["Manage model"].exists)
+    XCTAssertFalse(app.buttons["Manage storage"].exists)
+    XCTAssertFalse(app.buttons["Delete study data"].exists)
+    reach("Privacy and limitations").tap()
+    XCTAssertFalse(app.buttons["T0 diagnostics · synthetic only"].exists)
+    reach("← Back to settings").tap()
+    reach("Log out").tap()
+    app.alerts.buttons["Cancel"].tap()
+    XCTAssertFalse(app.buttons["Next splash"].exists)
+    reach("Log out").tap()
+    app.alerts.buttons["Log out"].tap()
+    XCTAssertTrue(app.buttons["Next splash"].waitForExistence(timeout: 10))
+    finishSplash()
+    reach("Continue offline").tap()
+    XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+    reach("Continue with my teacher").tap()
+    XCTAssertTrue(app.otherElements["AI Buddy"].firstMatch.waitForExistence(timeout: 10))
+    XCTAssertFalse(app.otherElements["Home"].firstMatch.exists)
+  }
+
   func testSplashStartupAndLogout() throws {
     app.launch()
     XCTAssertTrue(app.buttons["Next splash"].waitForExistence(timeout: 20))

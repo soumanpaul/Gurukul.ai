@@ -22,6 +22,8 @@ Created 2026-10-05 using the built-in image generation tool, based on [V1 scope]
 
 ## Ongoing design rule
 
+**V2 activated (2026-10-06):** Home, AI Buddy, Progress and Settings are enabled, including notebook import/study/history, quizzes and storage controls. Both startup splashes and Buddy's [inline file-chat extension](15-ai-buddy.md#file-chat-extension--2026-10-06) remain. Follow [the reversible activation document](../plans/demo-v1-v2.md); V1's two-tab policy is retained only as an optional build configuration. Activation does not establish release-quality acceptance.
+
 Startup/logout now follows [the two approved splash screens](splash/README.md): book → robot → saved profile/setup/Home destination. Confirmed logout returns to the first book splash. These references supersede earlier design-only splash navigation notes; native OS launch art remains separate.
 
 Launcher branding: [17 — App icon and name](17-app-branding.md), using the established digital-teacher robot and the native label “Gurukul AI”.

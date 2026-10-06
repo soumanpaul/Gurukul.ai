@@ -43,7 +43,7 @@ export function createRepository(database: SqlExecutor) {
       return profile;
     },
     async listNotebooks(): Promise<Notebook[]> {
-      return database.getAllAsync<Notebook>('SELECT id, title, created_at AS createdAt FROM notebooks ORDER BY created_at, id');
+      return database.getAllAsync<Notebook>("SELECT id, title, created_at AS createdAt FROM notebooks WHERE id NOT GLOB 'buddy-files-*' ORDER BY created_at, id");
     },
   };
 }

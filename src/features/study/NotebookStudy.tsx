@@ -15,7 +15,7 @@ import { QuizPanel } from './QuizPanel';
 const idle = { busy: false, progress: '', error: '', notebook: '' };
 const subscribeIdle = () => () => {};
 const snapshotIdle = () => idle;
-export function NotebookStudy({ foundation, notebook, historyOnly, viewportHeight = 0 }: { foundation: Foundation; notebook: string; historyOnly: boolean; viewportHeight?: number }) {
+export function NotebookStudy({ foundation, notebook, historyOnly, viewportHeight = 0, allowQuiz = true }: { foundation: Foundation; notebook: string; historyOnly: boolean; viewportHeight?: number; allowQuiz?: boolean }) {
   const { width, fontScale } = useWindowDimensions();
   const wide = wideNotebook(width, fontScale) && !historyOnly;
   const [manager] = useState(() => modelNativeAvailable ? getStudyManager(foundation) : null);
@@ -40,21 +40,21 @@ export function NotebookStudy({ foundation, notebook, historyOnly, viewportHeigh
   }
   if (quizOpen) return <QuizPanel foundation={foundation} notebook={notebook} section={section || undefined} close={() => setQuizOpen(false)} />;
   if (!historyOnly) return <View style={{ flexDirection: wide ? 'row' : 'column', gap: 18 }}><View style={{ flex: 1, minWidth: 0 }}><StudyChat sections={sections} section={section} select={setSection} question={question} change={setQuestion}
-    run={run} quiz={() => setQuizOpen(true)} busy={work.busy} available={!!manager} progress={work.progress}
+    run={run} quiz={allowQuiz ? () => setQuizOpen(true) : undefined} busy={work.busy} available={!!manager} progress={work.progress}
     error={error || (work.notebook === notebook ? work.error : '')} cancel={() => { void manager?.cancel().catch(() => setError('Stop requested. Wait for native work to finish.')); }}
     height={viewportHeight ? viewportHeight - 168 : 0} empty={!turns.length} scrollKey={`${turns[0]?.id}:${turns[0]?.status}`}>
     {[...turns].reverse().map(turn => <TurnCard key={turn.id} turn={turn} chat />)}
-  </StudyChat></View>{wide && <View style={{ flex: 1, minWidth: 0 }}><NotebookStudy foundation={foundation} notebook={notebook} historyOnly /></View>}</View>;
+  </StudyChat></View>{wide && <View style={{ flex: 1, minWidth: 0 }}><NotebookStudy foundation={foundation} notebook={notebook} historyOnly allowQuiz={allowQuiz} /></View>}</View>;
   return <View style={{ gap: 16 }} accessibilityLabel="Saved discussion and history">
     <Text style={styles.heading}>Study history</Text>
     <Text style={styles.note}>On this device · latest 100 turns. Sources preserve the original revision after edits.</Text>
-    <Action title="Quiz · practice and saved attempts" secondary disabled={work.busy} onPress={() => setQuizOpen(true)} />
+    {allowQuiz && <Action title="Quiz · practice and saved attempts" secondary disabled={work.busy} onPress={() => setQuizOpen(true)} />}
     {!turns.length && <Text style={styles.note}>No study turns yet.</Text>}
     {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
     {turns.map(turn => <TurnCard key={turn.id} turn={turn} />)}
   </View>;
 }
-function TurnCard({ turn, chat = false }: { turn: StudyTurn; chat?: boolean }) {
+export function TurnCard({ turn, chat = false }: { turn: StudyTurn; chat?: boolean }) {
   const [expanded, setExpanded] = useState('');
   let evidence: Evidence[] = []; let result: StudyResult | null = null;
   try { evidence = JSON.parse(turn.evidence_json); if (turn.result_json) result = validateStudy(turn.result_json, evidence); } catch { result = null; }

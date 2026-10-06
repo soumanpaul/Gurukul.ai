@@ -8,7 +8,7 @@ import mascot from '../../../assets/illustrations/book-mascot.png';
 
 export function StudyChat({ sections, section, select, question, change, run, quiz, busy, available, progress, error, cancel, height, children, empty, scrollKey }: {
   sections: Evidence[]; section: string; select(value: string): void; question: string; change(value: string): void;
-  run(action: StudyAction): Promise<void>; quiz(): void; busy: boolean; available: boolean; progress: string; error: string;
+  run(action: StudyAction): Promise<void>; quiz?: () => void; busy: boolean; available: boolean; progress: string; error: string;
   cancel(): void; height: number; children: ReactNode; empty: boolean; scrollKey: string;
 }) {
   const { fontScale } = useWindowDimensions();
@@ -36,7 +36,7 @@ export function StudyChat({ sections, section, select, question, change, run, qu
       <Chip label="Summarize" icon="align-left" disabled={!ready} onPress={() => { if (!section) setChooser(true); else { Keyboard.dismiss(); void run('summary'); } }}/>
       <Chip label="Explain" icon="help-circle" disabled={!ready} onPress={() => ask('explain')}/>
       <Chip label="Ask" icon="message-circle" disabled={!ready} onPress={() => { setMode('ask'); input.current?.focus(); }}/>
-      <Chip label="Quiz" icon="check-square" disabled={busy} onPress={quiz}/>
+      {quiz && <Chip label="Quiz" icon="check-square" disabled={busy} onPress={quiz}/>}
     </View>
     <Text style={design.caption}>Source-exact answers · Repeat the topic in each question.</Text>
     <ScrollView ref={conversation} onContentSizeChange={() => { if (shownKey.current !== scrollKey || busy) { conversation.current?.scrollToEnd({ animated: false }); shownKey.current = scrollKey; } }} nestedScrollEnabled keyboardShouldPersistTaps="handled" style={{ flex: 1, minHeight: 100 }} contentContainerStyle={{ gap: 16, paddingVertical: 8 }} accessibilityLabel="Notes conversation">
@@ -48,7 +48,7 @@ export function StudyChat({ sections, section, select, question, change, run, qu
     </ScrollView>
     <View style={[design.row, { flexWrap: 'wrap' }]}>
       <Chip label="Give me a hint" icon="help-circle" disabled={!ready} onPress={() => Alert.alert('A hint from your notes', 'In source-exact mode, the teacher can show a supporting passage, which may reveal the answer. Enter the topic, then choose Explain.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Enter topic', onPress: () => { setMode('explain'); input.current?.focus(); } }])}/>
-      <Chip label="Check my understanding" icon="message-circle" disabled={busy || !sections.length} onPress={quiz}/>
+      {quiz && <Chip label="Check my understanding" icon="message-circle" disabled={busy || !sections.length} onPress={quiz}/>}
     </View>
     <View style={design.composer}>
       <TextInput ref={input} accessibilityLabel="Question or topic from your notes" placeholder={mode === 'explain' ? 'Which topic should I explain?' : 'Ask your notes…'} placeholderTextColor="#768481" value={question} onChangeText={change} editable={!busy} maxLength={600} multiline returnKeyType="send" submitBehavior="blurAndSubmit" onSubmitEditing={() => { if (ready && question.trim()) ask(mode); }} style={design.input}/>

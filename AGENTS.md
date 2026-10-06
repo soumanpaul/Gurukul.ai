@@ -48,3 +48,6 @@
 - Read only relevant document sections; reuse context already loaded. Do not create another plan/review artifact for an existing clear ticket.
 - Update state.md at task completion or a material blocker, with a short result and next step. Report checks briefly; never claim skipped checks passed.
 - This check cadence governs project skills and workflow documents. Release acceptance in docs/quality/evaluation.md remains required for full V1.
+
+
+ <!-- Later, say: “Activate V2 using docs/plans/demo-v1-v2.md.” -->

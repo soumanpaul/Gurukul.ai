@@ -17,3 +17,6 @@ Built-in image generation, 2026-10-06. Saved asset: `assets/illustrations/settin
 Exact prompt:
 
 > Use case: illustration-story. Asset type: Gurukul Settings profile avatar, square mobile UI asset. Create one friendly flat illustrated bust portrait of a young woman with warm medium-brown skin, dark teal shoulder-length hair, small gentle smile, sage-green top, on a pale warm amber circular disk. Matching a quiet cream-paper student app with dark ink linework, minimal soft shading. Centered portrait fills the circle with generous clean silhouette, readable at 64 pixels. Outside the circle use genuine transparent background. No text, no letters, no logo, no watermark, no UI or phone. This is a generic decorative profile illustration, not a real user's likeness.
+# Copy amendment — 2026-10-06
+
+Do not show the “V1 · AI Buddy and Settings…” feature-rollout paragraph on the Settings overview. Feature gates remain; detailed Privacy and limitations content is unchanged.

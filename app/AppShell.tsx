@@ -28,7 +28,7 @@ import { T7Smoke } from '../src/features/diagnostics/T7Smoke';
 import { T8Evaluation } from '../src/features/diagnostics/T8Evaluation';
 import { getReader, nativeReaderAvailable } from '../src/t0/native';
 import { Action, Card, styles } from '../src/features/shared/ui';
-import { mainRoutes, routeLabels } from './routes';
+import { defaultRoute, resolveRoute, visibleTabs, routeLabels } from './routes';
 import type { Route } from './routes';
 
 export default function AppShell() {
@@ -41,7 +41,8 @@ function FoundationApp() {
   const [foundation, setFoundation] = useState<Foundation | null>(null);
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
-  const [route, setRoute] = useState<Route>('notebooks');
+  const [requestedRoute, setRoute] = useState<Route>(defaultRoute);
+  const route = resolveRoute(requestedRoute);
   const [introduction, setIntroduction] = useState<IntroductionPage | null>('book');
   const [contentHeight, setContentHeight] = useState(0);
   const active = foundation?.profile && foundation.session === 'active';
@@ -67,8 +68,8 @@ function FoundationApp() {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (introduction === 'robot') { setIntroduction('book'); return true; }
       if (introduction === 'book') return false;
-      if (route === 'notebooks') return false;
-      setRoute(route === 'diagnostics' ? 'settings' : 'notebooks');
+      if (route === defaultRoute()) return false;
+      setRoute(route === 'diagnostics' ? 'settings' : defaultRoute());
       return true;
     });
     return () => subscription.remove();
@@ -82,7 +83,7 @@ function FoundationApp() {
     if (!foundation) throw new Error('Storage is not ready.');
     await foundation.repository.saveSession(stage);
     setFoundation(previous => previous ? { ...previous, session: stage } : previous);
-    setRoute('notebooks'); resetProgressScroll();
+    setRoute(defaultRoute()); resetProgressScroll();
   }
   async function logout() {
     if (!foundation) return;
@@ -122,7 +123,7 @@ function FoundationApp() {
       </>}
     </ScrollView>}
     {active && route !== 'diagnostics' && <View style={{ flexDirection: 'row', borderTopWidth: 1, borderColor: '#e5dfd7', backgroundColor: '#fffaf2', paddingTop: 7 }}>
-      {mainRoutes.filter(destination => destination !== 'study').map(destination => {
+      {visibleTabs().map(destination => {
         const selected = route === destination;
         const label = destination === 'notebooks' ? 'Home' : routeLabels[destination];
         const icon = destination === 'notebooks' ? 'home' : destination === 'buddy' ? 'chatbubbles' : destination === 'progress' ? 'bar-chart' : 'settings';

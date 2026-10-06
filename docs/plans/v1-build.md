@@ -27,6 +27,8 @@ Individual estimates overlap demo and post-demo work; their full sum exceeds the
 
 ## Required UX delivery T0–T7
 
+Current hackathon presentation uses [V1 demo / V2 activation](demo-v1-v2.md): V1 enables only Buddy/Settings plus onboarding/splashes; the full feature implementation below is retained, not removed, and re-enabled by the documented V2 switch. This rollout naming is separate from full-V1 release acceptance.
+
 This is acceptance scope, not optional polish. Read [UX index](../UX/README.md) at task start, then only the mapped references. In a fresh hackathon build, implement these in their owning tickets; on this existing checkout, preserve completed behavior and implement only missing authorized work. T0 remains a minimal feasibility spike. T7 audits the combined experience rather than introducing the entire design for the first time. Estimates above are provisional: report an incomplete slice instead of silently dropping UX to meet a timebox.
 
 | Task | Required UX references | Deliver with this ticket |

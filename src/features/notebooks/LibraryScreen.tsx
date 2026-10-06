@@ -192,7 +192,7 @@ export function LibraryScreen({ foundation, viewportHeight = 0, onNavigate }: { 
   </>;
 }
 
-function ReviewScreen({ repository, job, source, close }: { repository: Foundation['imports']; job: ImportJob; source: Source; close(): void }) {
+export function ReviewScreen({ repository, job, source, close }: { repository: Foundation['imports']; job: ImportJob; source: Source; close(): void }) {
   const [pages, setPages] = useState<DraftPage[]>([]);
   const [index, setIndex] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);

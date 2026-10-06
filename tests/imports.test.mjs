@@ -9,6 +9,8 @@ import { createImportRepository } from '../src/adapters/sqlite/imports.ts';
 import { ImportManager } from '../src/services/import-manager.ts';
 import { ImportFailure, kindFromName, pageChunks, reviewedText } from '../src/domain/imports.ts';
 import { permittedCapture } from '../src/services/camera-permission.ts';
+import { createStudyRepository } from '../src/adapters/sqlite/study.ts';
+import { createRepository } from '../src/adapters/sqlite/repository.ts';
 
 async function setup() {
   const connection = new DatabaseSync(':memory:');
@@ -46,6 +48,32 @@ async function setup() {
   }
   return { connection, database, repository, notebookId, files, ports, manager, start };
 }
+
+test('Buddy file chats persist separately and require reviewed, selected, chat-scoped evidence', async () => {
+  const sample = await setup();
+  try {
+    const study = createStudyRepository(sample.database);
+    for (const [id, text] of [['buddy-files-one', 'Plants use sunlight to make food.'], ['buddy-files-two', 'Plants absorb water through roots.']]) {
+      await sample.repository.createNotebook(id, 'Attachment');
+      const job = await sample.manager.start({ notebookId: id, title: 'Notes.txt', kind: 'txt', text });
+      assert.deepEqual(await study.retrieve(id, 'Plants'), []);
+      await sample.repository.publish(job);
+    }
+    assert.equal((await sample.repository.buddyAttachments()).length, 2);
+    const notebooks = await createRepository(sample.database).listNotebooks();
+    assert.equal(notebooks.some(item => item.id.startsWith('buddy-files-')), false);
+    assert.equal(notebooks.some(item => item.id === sample.notebookId), true);
+    assert.equal((await study.retrieve('buddy-files-one', 'Plants'))[0].text, 'Plants use sunlight to make food.');
+    assert.deepEqual(await study.retrieve('buddy-files-one', 'roots'), []);
+    assert.deepEqual(await study.retrieve(sample.notebookId, 'Plants'), []);
+    const source = (await sample.repository.list('buddy-files-one'))[0];
+    await sample.repository.select(source.id, false);
+    assert.deepEqual(await study.retrieve('buddy-files-one', 'Plants'), []);
+    await sample.repository.recover();
+    assert.equal((await sample.repository.buddyAttachments()).length, 2);
+    assert.equal((await study.retrieve('buddy-files-two', 'roots')).length, 1);
+  } finally { sample.connection.close(); }
+});
 
 test('T2 upgrade preserves profile/notebooks, adds FTS and real FK enforcement', async () => {
   const sample = await setup();

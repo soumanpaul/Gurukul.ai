@@ -14,6 +14,7 @@ import { ModelCard } from './ModelCard';
 import type { ModelPorts } from '../../services/model-manager';
 import type { Foundation } from '../../services/foundation';
 import { StorageCard } from './StorageCard';
+import { productFeatures } from '../../domain/product-version';
 
 export function SettingsScreen({ profile, save, diagnostics, models, foundation, onNavigate, logout }: {
   profile: Profile; save(input: ProfileInput): Promise<void>; diagnostics(): void;
@@ -61,17 +62,17 @@ export function SettingsScreen({ profile, save, diagnostics, models, foundation,
       <SettingsRow icon="cpu" label={manifest.id} detail={status} onPress={() => setPage('model')}/>
       <View style={design.divider}/><SettingsRow label="Manage model" onPress={() => setPage('model')}/>
     </View>
-    <Text accessibilityRole="header" style={design.heading}>Storage</Text>
+    {productFeatures.fullStudy && <><Text accessibilityRole="header" style={design.heading}>Storage</Text>
     <View style={design.card}>
       <SettingsRow icon="database" label="Notes and practice history" onPress={() => setPage('storage')}/>
       <View style={design.divider}/><SettingsRow label="Manage storage" onPress={() => setPage('storage')}/>
-    </View>
+    </View></>}
     <Text accessibilityRole="header" style={design.heading}>Privacy</Text>
     <Pressable accessibilityRole="button" accessibilityLabel="Privacy and limitations" style={design.privacy} onPress={() => setPage('privacy')}>
       <Feather name="lock" size={29} color="#12313d"/><View style={design.grow}><Text style={design.body}>Study content stays on this device.</Text><Text style={design.small}>Uninstalling or clearing app data removes local records.</Text></View>
     </Pressable>
-    <Pressable accessibilityRole="button" accessibilityLabel="Delete study data" accessibilityHint="Choose a notebook or source, then confirm exactly what to delete" style={design.danger} onPress={() => setPage('storage')}><Feather name="trash-2" color="#b02b2b" size={20}/><Text style={design.dangerText}>Delete study data</Text></Pressable>
-    <Text style={design.confirm}>Choose what to remove. You’ll be asked to confirm.</Text>
+    {productFeatures.fullStudy && <><Pressable accessibilityRole="button" accessibilityLabel="Delete study data" accessibilityHint="Choose a notebook or source, then confirm exactly what to delete" style={design.danger} onPress={() => setPage('storage')}><Feather name="trash-2" color="#b02b2b" size={20}/><Text style={design.dangerText}>Delete study data</Text></Pressable>
+    <Text style={design.confirm}>Choose what to remove. You’ll be asked to confirm.</Text></>}
     <Action title={leaving ? 'Signing out…' : 'Log out'} secondary disabled={leaving} onPress={() => Alert.alert('Log out of this local workspace?', 'Return to the welcome page. Your notes, history, profile and downloaded teacher stay on this device. This is not account authentication or cloud backup; anyone continuing here can reopen this workspace.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log out', onPress: () => { setLeaving(true); setLogoutError(''); void logout().catch(() => { setLogoutError('Finish active work and unload the teacher in Manage model, then retry. Your data was kept.'); setLeaving(false); }); } },
@@ -81,7 +82,7 @@ export function SettingsScreen({ profile, save, diagnostics, models, foundation,
   return <>
     <Action title="← Back to settings" secondary onPress={() => setPage('overview')}/>
     {page === 'model' && <ModelCard repository={models} foundation={foundation} />}
-    {page === 'storage' && <StorageCard foundation={foundation} />}
+    {productFeatures.fullStudy && page === 'storage' && <StorageCard foundation={foundation} />}
     {page === 'profile' && <Card>
       <Text style={styles.heading}>Local profile</Text>
       <ProfileForm initial={profile} save={async input => { setSaved(false); await save(input); setSaved(true); }} />
@@ -91,8 +92,8 @@ export function SettingsScreen({ profile, save, diagnostics, models, foundation,
       <Text style={styles.heading}>Private by design</Text>
       <Text style={styles.body}>No account, phone number, email or cloud login is required. Your profile stays in this app's local database. Logout returns to the first splash, then the local profile.</Text>
       <Text style={styles.note}>Uninstalling or clearing app data loses local records. No backup, sync or recovery service is provided. Confirm source/notebook deletion in Storage. App-private storage is not a promise of encryption or forensic erasure.</Text>
-      <Text style={styles.note}>Clean printed English only: TXT/paste, PDF, JPEG/PNG and camera. No Bengali/Hindi OCR, arbitrary handwriting, DOCX, equations or diagram understanding. Local answers are source-exact excerpts; quizzes test source recall, not exam readiness. Phone memory/storage may limit generation. Android runtime and full accessibility acceptance remain unverified. No cloud fallback.</Text>
-      <Action title="T0 diagnostics · synthetic only" secondary onPress={diagnostics} />
+      <Text style={styles.note}>{productFeatures.fullStudy ? 'Clean printed English only: TXT/paste, PDF, JPEG/PNG and camera. No Bengali/Hindi OCR, arbitrary handwriting, DOCX, equations or diagram understanding. Local study answers are source-exact excerpts; quizzes test source recall, not exam readiness.' : 'AI Buddy supports local English chat and separate file chats using reviewed PDF/TXT or printed-text JPEG/PNG/camera OCR. File answers use source-exact excerpts, not visual understanding; repeat the topic for each question. No handwriting, Bengali/Hindi OCR or diagram understanding. Quizzes and progress remain V2.'} Phone memory/storage may limit generation. Android runtime and full accessibility acceptance remain unverified. No cloud fallback.</Text>
+      {productFeatures.fullStudy && <Action title="T0 diagnostics · synthetic only" secondary onPress={diagnostics} />}
     </Card>}
   </>;
 }

@@ -3,6 +3,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import book from '../../../assets/illustrations/splash-book.png';
 import robot from '../../../docs/UX/12-digital-teacher-avatar.png';
+import { productFeatures } from '../../domain/product-version';
 
 export type IntroductionPage = 'book' | 'robot';
 
@@ -23,9 +24,9 @@ export function IntroductionScreen({ page, next, back }: { page: IntroductionPag
         <Text style={design.subtitle}>Your AI classroom</Text>
         <View style={design.features}>
           {([
-            ['library', 'Add your subjects', '#d35e39'],
-            ['folder-open', 'Notes by subject', '#078276'],
-            ['checkbox', 'Generate quizzes', '#7250a5'],
+            ['library', productFeatures.fullStudy ? 'Add your subjects' : 'Add your subjects · V2', '#d35e39'],
+            ['folder-open', productFeatures.fullStudy ? 'Notes by subject' : 'Notes by subject · V2', '#078276'],
+            ['checkbox', productFeatures.fullStudy ? 'Generate quizzes' : 'Generate quizzes · V2', '#7250a5'],
             ['chatbubbles', 'Clear doubts with free AI buddy', '#167b98'],
           ] as const).map(([icon, label, color]) => <View key={label} style={design.feature}><View style={design.icon}><Ionicons name={icon} size={28} color={color} accessible={false}/></View><Text style={design.featureText}>{label}</Text></View>)}
         </View>

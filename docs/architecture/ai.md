@@ -38,6 +38,10 @@ Migration 4 stores each notebook's study turns, selected evidence/revisions, cov
 
 General-chat extension: [ADR-002](../decisions/ADR-002-local-ai-buddy.md) defines separate AI Buddy history/context and validation. It explicitly uses general model knowledge, never as a fallback for failed notebook retrieval. Source-backed Study remains unchanged.
 
+Buddy attachment entry points reuse source-backed Study, not the general Buddy prompt. Each file chat uses a durable notebook with a reserved `buddy-files-` ID prefix, existing import jobs/revisions/FTS and study-turn snapshots; no new schema or general-chat evidence mixing. Saved file chats are enumerated by that ID namespace (not user-controlled titles). They remain normal notebooks for later V2 storage cleanup. Attachments never become image tokens; PDF/text extraction and printed-English OCR feed reviewed text only. General and file histories are explicitly separate; independent-question and source-exact limitations still apply.
+
+The UI uses these scopes as internal conversation containers, excluded from the ordinary notebook library. Buddy renders inline attachments/review/messages/composer directly; it does not mount notebook navigation or require Save to notebook. Existing physical storage cleanup still sees the underlying records. This is UI/library separation, not a new standalone binary or separate database.
+
 ## Optional semantic retrieval gate
 
 Only add embeddings if measured recall on paraphrases is inadequate. Evaluate a multilingual model/export supported by the chosen native runtime; record license, dimensions, pooling, normalization, token limit and truncation behavior.

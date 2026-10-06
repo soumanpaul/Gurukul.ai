@@ -26,6 +26,9 @@ export function createImportRepository(database: Database) {
   }
   return {
     source, job, pages, transition,
+    async buddyAttachments() {
+      return database.getAllAsync<{ id: string; title: string; created_at: string }>("SELECT id,title,created_at FROM notebooks WHERE id GLOB 'buddy-files-*' ORDER BY created_at DESC,id DESC");
+    },
     async recover() {
       await database.withExclusiveTransactionAsync(async transaction => {
         await transaction.execAsync(`UPDATE documents SET status='interrupted' WHERE id IN
