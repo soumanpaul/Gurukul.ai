@@ -27,6 +27,8 @@ REQUIRED = (
     "docs/architecture/data.md",
     "docs/decisions/ADR-001-offline-v1.md",
     "docs/plans/v1-build.md",
+    "docs/plans/agent-prompts.md",
+    "docs/UX/README.md",
     "docs/quality/evaluation.md",
     "docs/engineering/agent-workflow.md",
     "docs/engineering/state.md",
@@ -39,6 +41,22 @@ SKILLS = (
     "gurukul-build-slice",
     "gurukul-evaluate-local-ai",
     "gurukul-review-change",
+)
+UX_TASK_REFERENCES = {
+    "T0": ("01-start-learning-v2.png",),
+    "T1": ("01-start-learning-v2.png", "09-home-ready-viewport.md", "13-settings-overview.md"),
+    "T2": ("12-digital-teacher.md", "13-settings-overview.md", "07-resilience-states.md"),
+    "T3": ("02-notes-and-study.png", "08-notebook-carousel.md", "09-home-ready-viewport.md", "10-all-notebooks.md"),
+    "T4": ("02-notes-and-study.png", "04-study-states.md", "11-history-tab.png", "11-history-tab.md"),
+    "T5": ("03-practice-and-revision.png", "05-quiz-states.md"),
+    "T6": ("03-practice-and-revision.png", "06-progress-states.md"),
+    "T7": ("03-practice-and-revision.png", "07-resilience-states.md", "13-settings-overview.md"),
+}
+UX_ASSETS = (
+    "assets/illustrations/book-mascot.png",
+    "assets/illustrations/open-book.png",
+    "assets/illustrations/settings-avatar.png",
+    "docs/UX/12-digital-teacher-avatar.png",
 )
 
 
@@ -77,6 +95,29 @@ def check(root):
                 fields[key.strip()] = value.strip()
         if fields.get("name") != name or not fields.get("description"):
             failures.append(f"Invalid skill name/description: {name}")
+        if "docs/UX/README.md" not in content or "required-ux-delivery-t0t7" not in content:
+            failures.append(f"Missing UX context routing in skill: {name}")
+
+    for relative in UX_ASSETS:
+        if not (root / relative).is_file():
+            failures.append(f"Missing approved UX asset: {relative}")
+    for reference in sorted({reference for references in UX_TASK_REFERENCES.values() for reference in references}):
+        path = root / "docs/UX" / reference
+        if not path.is_file():
+            failures.append(f"Missing required UX reference: {reference}")
+    documents.extend(path for path in sorted((root / "docs/UX").glob("*.md")) if path not in documents)
+    plan = root / "docs/plans/v1-build.md"
+    prompts = root / "docs/plans/agent-prompts.md"
+    if plan.is_file() and prompts.is_file():
+        plan_text = plan.read_text(encoding="utf-8")
+        prompt_text = prompts.read_text(encoding="utf-8")
+        for task, references in UX_TASK_REFERENCES.items():
+            row = re.search(rf"^\| {task} \|.*$", plan_text, re.MULTILINE)
+            prompt = re.search(rf"^## {task} —.*?(?=^## |\Z)", prompt_text, re.MULTILINE | re.DOTALL)
+            if not row or any(reference not in row.group() for reference in references):
+                failures.append(f"Missing UX acceptance mapping: {task}")
+            if not prompt or any(token not in prompt.group() for token in ("docs/UX/README.md", "Required UX delivery T0–T7", *references)):
+                failures.append(f"Missing copy-ready UX routing: {task}")
 
     for document in documents:
         content = document.read_text(encoding="utf-8")
@@ -98,7 +139,8 @@ def main():
         return 1
     print(f"PASS: {count} maintained documents, {len(SKILLS)} skills, local file links.")
     print(f"PASS: all {len(ORIGINAL_HASHES)} original input hashes unchanged.")
-    print("Application, native device, and AI quality checks: not implemented or run.")
+    print("PASS: T0–T7 UX mapping, copy-ready prompts, approved assets and skill routing.")
+    print("Application, visual fidelity, native device, and AI quality checks: not run by this validator.")
     return 0
 
 

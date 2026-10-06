@@ -3,7 +3,7 @@
 ## Product and scope
 - Build an offline student study assistant. Current baseline: docs/product/v1-spec.md.
 - Begin with docs/engineering/state.md; load only documents relevant to the task.
-- The repository currently contains planning and harness files, not a working application.
+- The repository contains a working Expo/native application plus planning and harness files. Inspect current code and state; do not scaffold over existing work or treat historical task reports as fresh instructions.
 - Preserve docs/my-research/** and docs/SWE_os.md. Do not edit, rename, or delete them.
 - Do not delete files without user confirmation. Do not overwrite database tables unless asked.
 - Use SQLite MCP for ~/codex/test.db and filesystem MCP for files in ~/codex.
@@ -24,6 +24,8 @@
 
 ## Workflow
 - For every future UI/UX task, use docs/UX/ as the canonical visual and interaction reference. Preserve its warm paper, teal/amber palette, typography, rounded cards, book character and navigation patterns. Reuse existing assets/components. When a required screen or state is missing, create the necessary UX reference in docs/UX/, update its README index, and keep the same look and feel; do not introduce an unrelated visual style.
+- From T0 onward, read docs/UX/README.md and the task's row in docs/plans/v1-build.md#required-ux-delivery-t0t7. T0 only routes/designs for later tickets; T1–T7 deliver their assigned UX with functionality, not as optional post-hackathon polish. Current numbered UX notes override older illustrative boards where explicitly revised. Robot teacher setup is the documented exception to book artwork. Never copy sample names, model sizes, scores or readiness as real data.
+- Every UI completion records the reference used, interaction checks, screenshot comparison when available, and pending device/accessibility gates. Use existing image assets/vector icons; use the imagegen skill for missing raster artwork, save it in the project and record the prompt in docs/UX/. Do not regenerate approved assets unnecessarily.
 1. Read the relevant plan ticket, acceptance criteria, and existing implementation.
 2. State a bounded approach. Implement only the authorized task and necessary fixes.
 3. Run available checks appropriate to the change; record missing checks honestly.

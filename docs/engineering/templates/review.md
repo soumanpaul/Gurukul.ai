@@ -3,6 +3,7 @@
 Task / requirement:
 Reviewed paths / diff:
 Evidence available:
+UX references/amendments and screenshot comparison (if UI changed):
 
 ## Findings
 For each actionable finding: severity, file/line, triggering condition, impact, reproduction and suggested correction.

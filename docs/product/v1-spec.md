@@ -10,15 +10,17 @@ Primary initial validation cohort: older school and college learners with Englis
 
 ## Experience
 
+Visual/interaction acceptance follows [docs/UX](../UX/README.md) and the [T0–T7 ownership map](../plans/v1-build.md#required-ux-delivery-t0t7). Current numbered amendments supersede older mockup copy; illustrative model names, scores and people are not runtime data. Implement the mapped UX in each feature ticket, not only at final polish.
+
 1. **Welcome:** “Welcome to Gurukul. I’m your AI study assistant.” Avatar is a lightweight local asset with idle/working/error states, accessible text, and reduced motion. No generated video or required voice.
 2. **Profile:** nickname/name and preferred language. Phone/email fields may be offered as optional local profile details with a Skip action. They are not verified accounts, Gmail sign-in, recovery, or access control. Recommend omitting them from the demo to reduce friction.
-3. **Get your teacher:** “Download your offline teacher.” Show actual model bytes, available storage, progress, license/attribution, connectivity requirement, cancel/retry, and device limitations. User can explore/import notes before completion; AI buttons explain why they are unavailable.
-4. **Home:** avatar greeting, offline readiness, notebooks/subjects, import/camera/paste actions, and “Continue studying.”
+3. **Get your teacher:** robot-led “Meet your digital teacher” and “Bring my teacher to life”, per reference 12. Disclose actual bytes/connectivity before explicit download; real progress/cancel/retry and plain-language storage/device limitations. Keep license/provenance/technical information accessible in Settings. Explore first keeps imports usable; AI explains unavailable states.
+4. **Home:** greeting and leaf Ready Offline badge backed by local availability (not release acceptance). “Welcome to” plus highlighted **Gurukul AI**, italic “Your personal AI classroom.”, approved amber Add your notes/book card. Horizontal notebooks, left/right controls, circular Create (+), View all page and File/Camera/Paste actions. Home imports require explicit destination selection; never silently choose the first notebook. Default phone viewport fits core actions; larger text/short windows may scroll rather than clip.
 5. **Notebook:** selectable sources, import status, study actions, and a persistent conversation. Desktop/tablet layout uses a right-hand discussion/history panel. Phone uses Sources / Study / History tabs or a drawer; do not squeeze three columns onto a phone.
 6. **Study actions:** Summarize selected section, Explain topic, Ask my notes, Prepare quiz. Show selected sources and language. A broad-document summary must disclose coverage or process all supported sections.
 7. **Quiz:** choose 3 or 5 questions; show one at a time; answers editable until submission. Score at the end, with correct answers, evidence, explanations, and “Review this topic.”
-8. **Progress:** dated attempts, scores, missed topics, sample counts, and linked revision actions. Relearning returns to the supporting notes and allows a fresh practice attempt.
-9. **Settings:** model/storage management, language, optional local profile, content deletion confirmation, and privacy explanation. Warn that uninstall/data clearing loses local records.
+8. **Progress:** latest submitted Practice complete score/date and source-backed amber missed-answer card, Review this topic and disclosed repeated Practice again. Retain full dated/adjusted history, sample counts, topic summaries, flags and unfinished attempts behind View all progress & history. Empty/all-correct/zero-scorable results remain honest; no mastery diagnosis.
+9. **Settings:** reference 13's compact profile/avatar, language, offline teacher, storage and privacy overview. Detail pages preserve working management and limitations. Delete study data opens scoped selection and named impact confirmation, never instant deletion. Warn that uninstall/data clearing loses local records. Home/Progress/Settings use filled active icons, highlighted bold labels and non-color selection indicators.
 
 ## Requirement and acceptance matrix
 

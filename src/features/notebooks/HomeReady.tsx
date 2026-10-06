@@ -89,7 +89,7 @@ const home = StyleSheet.create({
   headline: { fontFamily: serif, fontWeight: '700', color: '#102532' },
   welcome: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
   brandBadge: { maxWidth: '100%', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#086c70', borderWidth: 1, borderColor: '#73b8af' },
-  brandName: { fontFamily: serif, fontWeight: '700', color: '#ffffff', letterSpacing: 0.2 },
+  brandName: { fontFamily: serif, fontWeight: '700', fontStyle: 'italic', color: '#ffffff', letterSpacing: 0.2 },
   hero: { backgroundColor: '#fff0d6', borderRadius: 16, overflow: 'hidden', justifyContent: 'center' },
   heroArt: { position: 'absolute', right: 4, bottom: 16, width: '37%', height: '74%' },
   eyebrow: { color: '#80511e', fontSize: 13 },

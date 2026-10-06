@@ -8,6 +8,7 @@ These prompts authorize the named implementation task, not deployment or unrelat
 
 ```text
 Use $gurukul-build-slice to execute T0 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T0: UX index and 01-start-learning-v2.png; route later design work only, keep the spike minimal.
 Read AGENTS.md and docs/engineering/state.md first; inspect only the relevant architecture sections and current code.
 
 
@@ -26,8 +27,9 @@ Update state.md once with evidence, blockers and the next action. Stop after T0;
 
 ```text
 Use $gurukul-build-slice to implement T1 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T1: 01-start-learning-v2.png, 09-home-ready-viewport.md and 13-settings-overview.md; shared theme, local profile and filled-icon/bold-label active Home/Progress/Settings navigation.
 Read AGENTS.md, state.md and the T0 findings. Reuse the validated stack and versions. If T0 is incomplete, identify the missing gate and implement only foundation work that does not depend on it.
-use expo sdk 57 as we will be useing iphone expo go to develop and test the app
+Keep the validated SDK 57 cross-platform baseline unless compatibility evidence requires an approved change. Expo Go is UI preview only; llama.rn, native OCR/PDF and physical offline acceptance require custom native builds. Inspect Xcode/iPhone or Android tooling actually available; never substitute simulator/laptop evidence for phone tests.
 Build the Expo/TypeScript foundation:
 - Routes and feature/service/adapter boundaries from the architecture.
 - Welcome and local profile flow with nickname and language; no required phone/email or cloud login.
@@ -43,6 +45,7 @@ Run focused profile/persistence checks and relevant typecheck once; fix failures
 
 ```text
 Use $gurukul-build-slice to implement T2 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T2: 12-digital-teacher.md, 13-settings-overview.md and 07-resilience-states.md; robot introduction, explicit real download states, technical details in Settings and truthful readiness.
 Read AGENTS.md, state.md, R02 and the model-lifecycle section of docs/architecture/system.md. Confirm T1 and the selected runtime/model evidence exist.
 
 Implement the real model lifecycle:
@@ -61,6 +64,7 @@ Update state.md with actual evidence and remaining gates. Stop after T2; do not 
 
 ```text
 Use $gurukul-build-slice to implement T3 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T3: 02-notes-and-study.png, 08-notebook-carousel.md, 09-home-ready-viewport.md and 10-all-notebooks.md; approved branded compact Home, carousel/arrows/Create/View all, mandatory Home import destination, keyboard-safe forms and native picker dismissal/cancel/retry.
 Read AGENTS.md, state.md, R03/R04, and the ingestion/data architecture sections. Use the PDF/OCR adapters proven by T0 and the T1 app foundation.
 
 Implement:
@@ -79,6 +83,7 @@ Update state.md with supported inputs and remaining gaps. Stop after T3; do not 
 
 ```text
 Use $gurukul-build-slice to implement T4 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T4: 02-notes-and-study.png, 04-study-states.md, 11-history-tab.png and 11-history-tab.md; implement all saved/expanded/interrupted/empty History states with real citations and notebook scope.
 Read AGENTS.md, state.md, R05–R07 and the retrieval/prompt/output sections of docs/architecture/ai.md. Confirm T2 and T3 provide real model and indexed-source paths.
 
 Connect source selection to local study:
@@ -98,6 +103,7 @@ Update state.md briefly and stop after T4. Do not commit or publish.
 
 ```text
 Use $gurukul-build-slice to implement T5 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T5: 03-practice-and-revision.png and 05-quiz-states.md; focused question/source/progress/options/flag/navigation and actual scored result UI.
 Read AGENTS.md, state.md, R08/R09 and the quiz/output/data contracts. Confirm T4's grounded generation path exists.
 
 Implement source-backed quiz generation and attempts:
@@ -118,6 +124,7 @@ Update state.md and stop after T5. Do not commit or publish.
 
 ```text
 Use $gurukul-build-slice to implement T6 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T6: 03-practice-and-revision.png and 06-progress-states.md; latest-result score/date, amber evidence-backed review, disclosed repeated practice, and retained full progress/history/flags.
 Read AGENTS.md, state.md, R10 and the revision rules in docs/architecture/ai.md. Use T5's persisted attempts and immutable question evidence.
 
 Implement:
@@ -137,6 +144,7 @@ Run focused aggregation, repeat-attempt and invalid-item checks once. Update sta
 
 ```text
 Use $gurukul-build-slice to implement T7 in docs/plans/v1-build.md.
+UX acceptance: read docs/UX/README.md and “Required UX delivery T0–T7” in docs/plans/v1-build.md, then the mapped files under docs/UX/. T7: 03-practice-and-revision.png, 07-resilience-states.md and 13-settings-overview.md; finish Settings detail/deletion/recovery routes and audit every T1–T6 UX requirement, not just cosmetic polish.
 Read AGENTS.md, state.md, the product experience and R11–R14. Inspect the existing T2–T6 flows before changing them.
 
 Complete the V1 UX and resilience work:

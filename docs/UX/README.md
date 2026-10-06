@@ -20,6 +20,8 @@ Created 2026-10-05 using the built-in image generation tool, based on [V1 scope]
 
 ## Ongoing design rule
 
+Execution ownership: [Required UX delivery T0–T7](../plans/v1-build.md#required-ux-delivery-t0t7). Every build prompt and project skill routes here from the start. T0 reads the direction without expanding its spike; T1 establishes the shared shell; T2 teacher setup; T3 Home/import/library; T4 study/History; T5 quiz; T6 result/progress; T7 Settings/resilience and cross-screen audit. Designs marked design-only remain implementation obligations in their owning ticket, not proven completion. The harness validates references/routing, not visual fidelity.
+
 Teacher setup exception requested 2026-10-06: use the sci-fi robot avatar and simple student-facing copy in reference 12. Hide model/configuration details from the introduction; retain accessible attribution and honest download/readiness states in the supporting flow.
 
 All future Gurukul UI/UX work follows this folder as the canonical reference. Reuse the established palette, typography, cards, navigation and book character, including the generated implementation assets in `assets/illustrations/`. When a new feature needs an unrepresented screen or state, add its design/reference and interaction notes here and update the board index above. Keep the same look and feel; do not redesign the app independently for each ticket. Visual references never override accessibility, honest runtime states or offline/data-integrity requirements.

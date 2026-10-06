@@ -4,7 +4,7 @@ This operationalizes [SWE_os.md](../SWE_os.md). Product runtime AI and developme
 
 ## Installed versus proposed
 
-Installed here: project AGENTS.md, four repository skills, durable plans/decisions/state, task/review/benchmark templates, and a read-only harness validator. No global Codex configuration, MCP registrations, paid API dependencies, Git hooks, background agents, or application runtime were installed.
+Installed here: project AGENTS.md, four repository skills, durable plans/decisions/state, task/review/benchmark templates, a read-only harness validator and an Expo/native application. No global Codex configuration, MCP registrations, Git hooks or background agents are implied. Reuse the current app/toolchain; state.md separates historical from current evidence.
 
 Codex discovers repository skills from .agents/skills according to its [official skills documentation](https://developers.openai.com/codex/skills). If a skill is not visible, reopen the project/session. Scoped [AGENTS.md instructions](https://developers.openai.com/codex/guides/agents-md) guide work; they are not a security sandbox.
 
@@ -12,8 +12,8 @@ Codex discovers repository skills from .agents/skills according to its [official
 
 | Work | Read |
 |---|---|
-| Every task | AGENTS.md, state.md, current ticket |
-| Scope/UX | docs/product/v1-spec.md |
+| Every task | AGENTS.md, state.md, current ticket, docs/UX/README.md and the owning Required UX delivery T0–T7 row in docs/plans/v1-build.md |
+| Scope/UX | docs/product/v1-spec.md, only the mapped docs/UX boards and current numbered notes; inspect referenced images before visual work |
 | Runtime/native/import | docs/architecture/system.md, ADR-001 |
 | Retrieval/generation/model | docs/architecture/ai.md, docs/quality/evaluation.md |
 | Persistence/scoring | docs/architecture/data.md, relevant product requirements |
@@ -26,9 +26,9 @@ Do not load all raw research for every feature. Canonical precedence is current 
 
 1. Explore the actual implementation; choose a bounded ticket and record acceptance.
 2. Reuse the existing ticket. Create a new task document only for a materially new or ambiguous scope.
-3. Implement the smallest coherent vertical slice; do not redesign unrelated features.
+3. Implement the smallest coherent vertical slice including its required UX; do not postpone every visual/interaction requirement to T7 or redesign unrelated features. Current UX notes override superseded board examples, never runtime honesty or safety. Reuse assets; missing raster artwork uses imagegen with project-local output and recorded prompt. Add missing states to the UX folder/index.
 4. Run the smallest relevant checks once, following AGENTS.md's lean verification policy.
-5. Inspect changed code for acceptance and failure modes; a separate review report is optional unless requested.
+5. Inspect changed code for acceptance and failure modes; for UI, compare actual screenshots with mapped references and check relevant navigation, keyboard/picker, real-data, accessibility and deletion behavior. A separate review report is optional unless requested. If native hardware/authentication is missing, record the exact pending gate; browser/simulator evidence is not physical phone evidence.
 6. Update state.md once at task completion or a material blocker with concise evidence and next action.
 
 Routine work does not trigger full benchmark runs, full test suites, research hash audits, skill revalidation, or separate planning/review passes. Reuse already loaded context and established toolchain evidence. Run broader checks for affected cross-cutting behavior, release readiness, or explicit requests. T0 still needs real feasibility evidence; full V1 still needs T8 release gates.
@@ -66,8 +66,8 @@ Prefer narrow project-scoped actions because the existing Git root is ../../. Do
 
 ## Commands and evidence
 
-Available now: python3 scripts/check_harness.py.
+Harness command: python3 scripts/check_harness.py. It validates required UX references and T0–T7 prompt routing as well as skills/links; it does not prove screens were implemented.
 
-At T1, establish and document real app commands for typecheck, lint, tests, native build and device smoke tests. Do not invent passing pnpm/npm commands before package.json exists. Pin one package manager and dependency lockfile.
+On a fresh build, establish app commands at T1. On this checkout inspect package.json, the lockfile and README for existing typecheck/lint/test/native commands and local toolchain paths. Reuse valid evidence and never invent passing commands. Use one pinned package manager/lockfile. Respect user-managed Metro; do not restart native/AI release benchmarks for UI edits.
 
 The checker catches structural mistakes; it cannot verify architecture, model truth, instruction compliance, native compatibility or learning outcomes. Human review and actual device evidence remain necessary.
