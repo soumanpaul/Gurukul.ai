@@ -1,0 +1,50 @@
+{
+  "name": "gurukul-t0",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "postinstall": "node scripts/private-llama.mjs",
+    "native:privacy": "node scripts/private-llama.mjs",
+    "start": "EXPO_NO_TELEMETRY=1 expo start --go",
+    "start:dev": "EXPO_NO_TELEMETRY=1 expo start --dev-client",
+    "android": "EXPO_NO_TELEMETRY=1 expo run:android",
+    "ios": "EXPO_NO_TELEMETRY=1 expo run:ios --device",
+    "prebuild": "EXPO_NO_TELEMETRY=1 expo prebuild --no-clean --no-install",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint App.tsx index.ts app src tests eslint.config.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "model:download": "node scripts/t0-model.mjs"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "15.0.2",
+    "expo": "57.0.26",
+    "expo-build-properties": "57.0.22",
+    "expo-constants": "57.0.20",
+    "expo-dev-client": "57.0.19",
+    "expo-document-picker": "57.0.3",
+    "expo-file-system": "57.0.7",
+    "expo-font": "57.0.4",
+    "expo-image-picker": "57.0.20",
+    "expo-modules-core": "57.0.20",
+    "expo-sqlite": "57.0.3",
+    "llama.rn": "0.9.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "5.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.4",
+    "eslint": "10.12.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1"
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || >=25.0.0"
+  },
+  "expo": {
+    "autolinking": {
+      "nativeModulesDir": "./modules"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "platforms": ["android", "apple"],
+  "apple": { "modules": ["DocumentReaderModule"] },
+  "android": { "modules": ["org.gurukul.t0.DocumentReaderModule"] }
+}

@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Gurukul T0",
+    "slug": "gurukul-t0",
+    "version": "0.0.1",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "bundleIdentifier": "org.gurukul.t0",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "org.gurukul.t0",
+      "allowBackup": false
+    },
+    "plugins": [
+      "expo-dev-client",
+      ["expo-image-picker", { "cameraPermission": "Allow Gurukul to capture printed notes for on-device OCR. File and paste remain available without camera access.", "photosPermission": false, "microphonePermission": false }],
+      ["expo-build-properties", { "ios": { "enableSceneSupport": true } }],
+      ["llama.rn", { "enableOpenCLAndHexagon": false, "enableEntitlements": false }]
+    ]
+  }
+}

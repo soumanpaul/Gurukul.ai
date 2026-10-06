@@ -1,0 +1,231 @@
+# V1 implementation plan
+
+Planning date: 2026-10-05. Event: 2026-10-06. Status: T0 phone/standalone feasibility passed; T1 foundation verified; T2 focused phone download/cancel/retry/integrity/new-model lifecycle gate passed. T3–T9 not started; broader release gates remain pending.
+
+Platform update (2026-10-05): Xcode is installed and integrated iOS Simulator checks passed. The shared app stays on SDK 57. Expo Go is an interface preview with native AI/OCR/PDF disabled; custom development builds provide those integrations. Follow the [iOS recipe](../../README.md#run-the-ios-development-app), [Android recipe](../../README.md#test-the-android-development-app) and [handoff](../engineering/state.md). Earlier blocked results below remain historical.
+
+## Critical path and time budget
+
+T0 → T1 → T2/T3 → T4 → T5 → T6 → T7 → T8. Work can be sequenced by one engineer. Parallel work requires explicit authorization and disjoint ownership.
+
+Tomorrow's suggested budget is 10–14 focused hours, not a guarantee. Spend the first 90 minutes proving the model and native build. A clean full V1 including robust native ingestion and recovery likely needs an additional 5–10 engineering days after a successful spike; unknown toolchain/device issues can extend this.
+
+| Task | Dependencies / estimate | Deliverable and acceptance |
+|---|---|---|
+| T0 Device/runtime/ingestion spike | None; 60–90 min timebox | Record actual phone/OS/RAM/storage and available Android SDK/JDK. Compile a minimal development build, load one pinned GGUF, produce a local answer, test one OCR image and one PDF path. Measure load/first token/memory. Select exact compatible versions and extractor. No claim of phone support without evidence. |
+| T1 App foundation | T0; 1–2 h | Expo/TypeScript app, routes, feature/service boundaries, SQLite first migration, synthetic fixture, scripts for typecheck/lint/test. Local profile survives restart; no required contact/account. |
+| T2 Teacher installation | T1; 2–4 h | Explicit download with actual bytes, trusted manifest/hash, partial state/retry/storage failure; load/unload/cancel. Offline/no-model UI. For demo only a verified preinstalled artifact may be disclosed; full R02 still pending. |
+| T3 Import and source library | T1 + T0 ingestion evidence; 3–6 h | Implemented 2026-10-06; acceptance amber pending manual picker/camera/review and Android runtime. Paste/TXT, PDF, JPEG/PNG, camera adapters, permission handling, review/edit OCR, private copy, revision/job lifecycle, indexing. Focused iPhone native smoke and real SQLite checks passed; [evidence](../engineering/state.md#current-t3-result), [contract](../engineering/t3-imports.md). R03/R04 fully pass before claiming full ingestion. |
+| T4 Retrieval and study | T2 + T3; 2–4 h | Implemented 2026-10-06; quality amber. Scoped FTS, tokenizer budgets, source-exact summary/ask/explain, validated citations, cancellation and persistent history/recovery. Three phone actions and two refusals passed; malicious-note output blocked, free-form explanation quality not passed. [Evidence and pending gates](../engineering/state.md#current-t4-result). |
+| T5 Quiz loop | T4; 2–3 h | Generation blocker resolved 2026-10-06: pinned Qwen2.5-1.5B-Instruct plus source-constrained cloze decoding passes real 3/5-item generation, immutable snapshots and deterministic/idempotent phone scoring; 37 focused host checks green. Manual UX, broader conceptual quality and release gates remain amber. [Evidence](../engineering/state.md#current-t5-result). |
+| T6 Progress and revision | T5; 1–2 h | Implemented 2026-10-06: dated original/adjusted history, latest-ten section evidence, limited/priority review, saved-source links, atomic repeated practice and ambiguity exclusions. 25 focused checks and data-preserving native migration/install pass; manual phone interaction, Android and accessibility pending. [Evidence/next action](../engineering/state.md#current-t6-result). T7 not started. |
+| T7 UX and resilience | T2–T6; 2–4 h | Implemented 2026-10-06: avatar/readiness, adaptive discussion, confirmed deletion/recoverable cleanup; 39 focused checks and 2 native privacy-patch checks passed. Signed iOS and Android ARM64 CPU/JNI builds pass. Physical iPhone real-generation log-canary, interruption/cleanup relaunch, keyboard/confirmed synthetic deletion and large-text home accessibility audit passed; existing data preserved. **Amber:** hands-on VoiceOver/Reduce Motion, wider accessibility/layout and Android runtime pending. [Evidence and remaining gates](../engineering/state.md#current-t7-result). |
+| T8 Evaluation and release build | T7; 2–4 h minimum | Evaluated 2026-10-06; **release blocked**. Fixed phone corpus: retrieval 20/20, validated answers 14/20, quiz sets 0/10; absent-evidence relevance failure. Host checks/build pass. Sustained test stopped by user before 15 minutes; disconnected/network/human gates pending. [Evidence, artifact and demo script](../quality/reports/t8-release-evaluation.md). No distribution or automatic test restart. |
+| T9 Post-demo hardening | T8; remaining V1 work | Complete any omitted R01–R14, second device tier, migration/recovery suite, privacy/backup inspection; language support only with evidence. |
+
+Individual estimates overlap demo and post-demo work; their full sum exceeds the demo budget. The demo is a deliberate subset.
+
+## Go/no-go after T0
+
+- **Green:** physical phone loads and answers locally, build path works → proceed with phone demo.
+- **Amber:** model works but camera/PDF is blocked → demo paste/text and the tested input path; record missing V1 requirements.
+- **Red:** native/model blocked after timebox → use an explicitly labeled laptop-local prototype or a clearly labeled recorded demonstration. Never present LAN/laptop inference or canned answers as phone-local AI.
+- Browser alternative is chosen only after testing the actual target browser; it is not an automatic shortcut.
+
+## T2 model lifecycle result — 2026-10-06
+
+**Complete within the bounded iPhone acceptance scope.** Fresh phone transfer gate passed after the screen-awake fix below. No T3 expansion, commit or publication.
+
+| Acceptance | Result / evidence |
+|---|---|
+| Explicit setup, bytes/license/provenance | Settings Teacher card and confirmation; pinned Qwen3-0.6B Q4_K_M manifest unchanged. Exact 396,705,472 bytes, SHA/revision/license/runtime visible. No automatic download, external URL input or study-content network path. |
+| Download integrity and storage | Unique partial/final names; actual byte progress, two-copy + 1 GiB reserve, native streaming full size/hash check before non-overwriting same-directory promotion. Existing files retained; failure cannot make a partial loadable. Host tests green; full 396,705,472-byte phone transfer/hash/promotion passed, then the newly downloaded file produced a real answer. |
+| Cancel/retry/interruption | Foreground download task, native pause request, durable state/checkpoint, visible restart-from-zero notice. No unsafe resume: range/ETag resume is not implemented. OS-owned iOS temporary bytes are not guaranteed durable. Host tests green. Final phone run cancelled after 1,523,163 bytes and restarted successfully; prior attempts also proved foreground interruption and retention of the old verified model. Screen stays awake only during transfer; manual backgrounding still cancels. |
+| Load/unload/inference | Shared native lease for T2 and T0 prevents competing contexts/OCR; explicit load, unload, synthetic answer, cancellation and background cleanup. Host overlap/background/load-cancel tests green. Actual iPhone verification → load → real local answer → unload passed. Physical interruption stress not claimed. |
+| Offline/no-model/data preservation | Honest absent/failed/ready UI and safe errors; notebooks/profile independent of model. Migration 2 preserves T1 rows. Real phone before/after profile and notebooks identical; SQLite quick_check `ok`, ledger `[1,2]`, pinned ready installation row. No new airplane-mode run. |
+| Native/tooling compatibility | Exact MIT expo-file-system 57.0.7, Expo 57.0.26, RN 0.86.3, llama.rn 0.9.1; Expo matrix check, typecheck/lint, 9 SQLite/foundation + 11 lifecycle tests pass. Signed iPhone Release build/install and focused Android DocumentReader Kotlin compile pass; no new APK or Android-device claim. |
+
+Phone: same iPhone 16 Pro / iOS 27.0 build 24A437. T2 report confirms embedded production JS, RAM 8,016,379,904 bytes, free storage 8,396,800,000 bytes at start. Existing staged artifact was verified/adopted; **no download performed**. Real answer: “Plants use sunlight to make food through photosynthesis.” Load 383 ms, first token 215 ms, completion 410 ms (rounded app measurements); resident before/loaded 63,373,312 / 762,855,424 bytes. Snapshots, not peak or cold-storage benchmark. Context released and metadata read back as ready.
+
+Evidence: `.local/t2/phone-smoke.json`, `.local/t2/database-check.json`, private SQLite snapshot, `.local/t2/phone-console.log`; build `.local/t0/t2-iphone-final-build.log`, tests `.local/t0/t2-tests.log` (18 at that stage) plus final model-only `.local/t0/t2-model-tests-final.log` (11), Android `.local/t0/t2-android-compile-online.log`. Initial offline Android compile lacked cached safe-area Gradle dependencies; network-enabled retry passed. Native pod script phases inspected: Expo prebuilt-framework selection and local dSYM mapping. npm install reports 23 dependency audit findings (7 moderate/16 high); not remediated or waived by this bounded ticket.
+
+Verification build uses opt-in `T0_OFFLINE_SMOKE` compilation condition for the explicit T2 launch/report hooks; normal launch does not run smoke/download. Original implementation slice relaunched normally without Metro URL; user's Metro untouched, original model/fixtures/reports retained. No deletion or full release benchmark.
+
+**Download follow-up history:** explicit `--gurukul-t2-smoke --gurukul-t2-download` launch cancelled after 1,081,038 bytes, then restarted to 334,560,051 bytes before foreground loss. A ready-confirmed retry similarly stopped at 283,809,420 bytes after 68.80 s. Reports `.local/t2/phone-download-attempt1.json` and `phone-download-attempt2.json`; original-model fallback stayed ready, not falsely promoted new files. Auto-Lock was suspected rather than instrumented. Native download-only screen-awake handling now restores idle behavior in `finally`; manual backgrounding still cancels. Smoke UI now shows actual progress. No new dependencies. Typecheck/changed-file lint, signed iPhone build/install and Android Kotlin compilation passed; unchanged state/migration tests not repeated.
+
+**Final transfer gate passed:** cancel at 1,523,163 bytes → new staging identity → full 396,705,472-byte download, size/SHA verification and promotion in **92,168.29 ms** → load **335 ms** → real answer “Plants use sunlight to make food through photosynthesis.” (first token **183 ms**, completion **333 ms**) → unload. New final filename, not the preinstalled artifact, was passed to the runtime. Resident before/loaded 94,584,832 / 789,086,208 bytes; snapshots, not peaks. iPhone 16 Pro / iOS 27.0; free phone storage 7,946,240,000 bytes at start. No new disconnected/network audit or broad benchmark claim.
+
+Evidence `.local/t2/phone-download-passed.json`, `.local/t2/downloaded-database-check.json`, private SQLite snapshot/progress screenshot, `.local/t2/phone-download-awake-console.log`, `.local/t2/awake-build.log`, `.local/t2/awake-android-compile.log`. Actual profile/notebook rows unchanged; quick_check `ok`; new ready filename/hash persisted and partial cleared. Original GGUF and new GGUF both remain on device. App relaunched normally without test flags or Metro URL; no files deleted, commit or publish. Next: authorize T3 separately; Android-device and full release gates remain separate.
+
+## T1 foundation result — 2026-10-06
+
+**Complete within the T1 acceptance scope.** No T2–T9 implementation, commit or publication.
+
+| Acceptance | Evidence |
+|---|---|
+| Expo/TypeScript and routes | Shared `app/AppShell.tsx`, typed local destinations in `app/routes.ts`; welcome/profile gate, notebooks/study/progress/settings, diagnostics back navigation and Android back handler. Flat native navigation, not a deep-link router. |
+| Feature/service/adapter boundaries | `src/features/` screens, `src/domain/` profile validation/fixture, `src/services/foundation.ts`, `src/adapters/sqlite/`, ordered `src/db/migrations/`. T0 screen preserved as diagnostics; no fake AI on study/progress pages. |
+| Local profile, no account/contact | Nickname or Skip → Student; en/hi/bn preference, explicitly not translated UI or untested OCR support. Settings edit/save, validation, no cloud requests or account fields. |
+| SQLite first migration | App-private `gurukul.db`; migration ledger, singleton profile, notebooks/index, synthetic notebook seeded once. Bound parameters, UTC timestamps, stable UUIDs, WAL, foreign keys on main and dedicated BEGIN IMMEDIATE transaction connections. Future/gapped/unversioned-conflict schemas fail without resets. |
+| Restart persistence | Real iPhone SQLite saved default profile then edited nickname. After signed reinstall and cold process launch with no Metro URL, full profile row matched the pre-restart snapshot, integrity `ok`, migration 1, one notebook. Phone home visibly showed saved nickname and sample. |
+| Synthetic fixture | Bundled photosynthesis text with fixed sample UUID and explicit synthetic/page provenance; not imported or generated content. |
+| Real checks | Eight Node tests using real SQLite: fresh/idempotent migration, disk reopen/Unicode/SQL-like input, failed upgrade rollback, future/gapped history refusal, conflicting unversioned schema preservation, validation, singleton/language constraints and route list. Typecheck, lint and Expo dependency check passed. Native Release build, deep/strict signature check, USB install and launch passed. |
+
+New runtime pins: MIT `expo-sqlite@57.0.3`, MIT `react-native-safe-area-context@5.7.0`, aligned with SDK 57. Tooling: TypeScript 6.0.3 (Apache-2.0), @types/react 19.2.4, ESLint 10.12.0, typescript-eslint 8.71.1 (MIT). Initial old TS/types pins were flagged by Expo and corrected; final compatibility check passes. All AI/runtime/model pins remain unchanged. Native SQLite transaction setup is explicit because Expo's convenience exclusive transaction opens another connection whose foreign-key pragma would not inherit the main connection's setting.
+
+Physical evidence: `.local/t1/phone-persistence-result.json`, `.local/t1/phone-database-check.json`, private SQLite snapshots under `.local/t1/`, `.local/t1/final-home.png`; build `.local/t0/t1-iphone-final-build.log`, initial runtime `.local/t0/t1-phone-console.log`. Snapshot/ screenshots contain the user's local nickname and remain ignored/local. The user interacted with onboarding/settings; Study, Settings and final Notebooks were visually inspected. Progress is implemented but not separately claimed as a captured native interaction. Final keyboard scrolling fix was rebuilt and installed. Prior model/fixtures and both T0 reports remain present.
+
+Limits: native verification used iPhone 16 Pro / iOS 27.0; Android/Expo Go runtime not repeated, full accessibility/large-text suite and fresh airplane-mode onboarding not run. Screenshot shows network enabled during T1 UI checks; no offline-state claim is inferred. Release app loads embedded JS and profile flow contains no network/account dependency; T0's earlier user-confirmed disconnected test is separate evidence. Node emits experimental SQLite/module-detection warnings. No full benchmark, harness/hash audit or unrelated checks. Storage failures surface safe retry messages, never a reset option. Database upgrades adding notes/quizzes remain later work.
+
+Next: T2 model installation/lifecycle, only after separate authorization. Keep the current pre-staged model limitation explicit; T1 does not implement downloader/import/RAG/grading.
+
+## T0 standalone follow-up — 2026-10-06
+
+**Focused check passed.** User confirmed readiness after instructions to enable Airplane Mode and explicitly disable Wi-Fi/Bluetooth. Signed Release app cold-launched using `devicectl ... --terminate-existing org.gurukul.t0 --gurukul-t0-smoke`, with no Metro URL. USB remained connected; wireless state is user-confirmed, not instrumented. This is not a packet/privacy audit or proof across all devices.
+
+- `javascriptDevelopmentMode: false`, `embeddedBundlePresent: true`; production `main.jsbundle` is 1,477,178 bytes. Build/signature/install passed, app data preserved. Explicit `T0_OFFLINE_SMOKE` compile flag enables opt-in reporting in this verification build; ordinary Release omits it. No changes to model/runtime pins or inference parameters from the phone result below.
+- Real generated answer: “Plants use sunlight to make food through photosynthesis.” Load/init 351.99 ms, first token 199.15 ms, completion 357.93 ms. Resident before/loaded/after: 58,589,184 / 757,366,784 / 784,941,056 bytes. Model verification and release completed. Fresh process only; OS/model/shader caches were not cleared, so this is not a cold-storage benchmark.
+- PNG OCR 190.40 ms, 141,869,056 resident bytes; image-only PDF render/OCR 67.93 ms, 143,671,296 resident bytes. Both exact expected text. These remain sequential synthetic measurements and memory snapshots, not peak or release benchmarks.
+- Phone report `.local/t0/iphone-offline-CCD2F21D.json`, native log `.local/t0/iphone-offline-console.log`, build log `.local/t0/iphone-offline-build.log`. No Metro URL or development JS; existing user Metro remained running and untouched. Relaunched without any test/server arguments for manual use. No commit/publish, file deletion, full benchmark or T1 expansion. Next: T1 only with separate authorization; broader quality/lifecycle/network gates remain.
+
+## T0 physical iPhone result — 2026-10-05
+
+Authorized standalone follow-up: Release build and deep/strict signature verification passed; installed over the development app, preserving model/fixtures/prior evidence. Embedded `main.jsbundle` is 1,477,178 bytes. Explicit command-scoped `T0_OFFLINE_SMOKE` condition enables the test harness in this verification build only; normal Release omits it. TypeScript passed. Awaiting user confirmation of Airplane Mode plus Wi-Fi/Bluetooth off before a cold launch without Metro URL. No disconnected result yet; log `.local/t0/iphone-offline-build.log`, handoff in state.md.
+
+**Green for bounded T0 phone feasibility.** A signed development build runs and generates a real local answer on the physical iPhone; both synthetic ingestion paths pass. Amber is not applicable; prior red signing/native blockers are resolved. This is not release acceptance, general model-quality evidence, Android support, or proof of standalone disconnected operation. No cloud or laptop inference service was used; Metro supplied development JavaScript only.
+
+- Device: actual iPhone 16 Pro (`iPhone17,1`), iOS 27.0 build 24A437, wired pairing. Physical RAM reported by ProcessInfo: 8,016,379,904 bytes. Advertised device storage from devicectl: 256,000,000,000 bytes; app filesystem reports 247,512,735,744 bytes total and 8,437,760,000 free at test start. Device identifiers are not included here.
+- Runtime: Expo 57.0.26, RN 0.86.3, React 19.2.3, expo-dev-client 57.0.19, expo-constants/expo-modules-core 57.0.20, llama.rn 0.9.1, expo-build-properties 57.0.22 (MIT), Apple Vision/PDFKit. Node 22.23.3, Xcode 27.0 (27A266a), iOS SDK 27.0, CocoaPods 1.16.2. Scene support enabled for iOS 27. TypeScript/native compilation passed; deep/strict signature verification, USB installation and trusted-profile launch passed. Build-scoped `ENABLE_USER_SCRIPT_SANDBOXING=NO` was required for RN's `ip.txt` write; Keychain/profile trust were resolved by the user, without sharing passwords.
+- Model: Qwen3-0.6B Q4_K_M, `unsloth/Qwen3-0.6B-GGUF` revision `50968a4468ef4233ed78cd7c3de230dd1d61a56b`, 396,705,472 bytes, Apache-2.0, SHA-256 `ac2d97712095a558e31573f62f466a3f9d93990898b0ec79d7c974c1780d524a`; pinned license URL remains in `src/t0/model.json`. Verified again by native streaming SHA before loading. CPU, two threads, context 2048, seed 42, temperature 0, output cap 128; log confirms zero of 29 layers offloaded. Metal backend discovery still contributes to initialization.
+- **Real answer:** “Plants use sunlight to make food through photosynthesis.” App init/load 6425.12 ms, first token 223.69 ms, completion 408.41 ms. Init includes native setup/warmup, excludes prior verification. Resident bytes before/loaded/after: 265,175,040 / 960,741,376 / 980,008,960 (snapshots, not peak). Model context released after generation. One short synthetic question only.
+- **Printed image OCR:** exact expected sentence, 245.08 ms, 334,004,224 resident bytes. **Image-only PDF render → OCR:** exact same sentence, 67.91 ms, 335,134,720 resident bytes. Sequential warm-path timings, not comparative benchmarks. No direct PDF text extraction, camera/handwriting/Bengali claim.
+- Evidence retrieved from the phone: `.local/t0/iphone-smoke-610C635B.json` (original app report `t0-smoke-610C635B-B1A3-4598-BFB1-133668CF8D37.json`); native console `.local/t0/iphone-trusted-console.log`; signed build `.local/t0/iphone-build-keychain-retry.log`. Model/fixtures were staged in app Documents, not downloaded by a finished product installer.
+- Relaunched without the smoke flag for manual use; app left open, user Metro untouched. About 5.9 GiB free on Mac. No file deletion, commit, publication, UI expansion or release benchmark. Stop at T0. Next authorized verification should prove embedded-JS cold launch and the same synthetic checks with networking disconnected; then plan further work separately. Signing renewal and broader lifecycle/quality/device support remain limitations.
+
+## T0 iOS integrated result — 2026-10-05
+
+Latest physical follow-up: Keychain-adjusted build succeeded and deep/strict host signature verification passed. Installed the development app by USB on iPhone 16 Pro and staged the pinned GGUF plus PNG/PDF in its initially empty Documents. iOS rejected first launch with a security/profile-trust error; user must trust the development profile before runtime testing. No physical inference/OCR evidence yet. Logs: `.local/t0/iphone-build-keychain-retry.log`, `.local/t0/iphone-smoke-console.log`. Prior signing failures below are historical.
+
+Physical follow-up: iPhone 16 Pro / iOS 27.0 build 24A437 is connected, Developer Mode enabled and signing identity/team configured. Added MIT `expo-build-properties@57.0.22` and its scene lifecycle option required for iOS 27 ([Expo documentation](https://docs.expo.dev/versions/v57.0.0/sdk/build-properties/)). Prebuild/Pods/typecheck and physical compilation passed; packaging hit Xcode script sandboxing (`ip.txt`), then Keychain `errSecInternalComponent`. A build-scoped sandbox override resolves the first issue; current retry awaits local development-key authorization. No phone installation or runtime result yet. Debug smoke opt-in now supports physical iOS and reports actual device scope/OS/RAM/storage; release and normal launches remain unaffected. Logs and next action are in state.md. The simulator evidence below remains historical and is not replaced by phone claims.
+
+- **Simulator feasibility passed; physical T0 go/no-go pending.** Green is not yet met because it explicitly requires a physical phone. Amber (working model but blocked ingestion) does not describe this simulator result: inference and both ingestion paths passed. The previous red native/model blocker is resolved for the simulator only; do not present this as phone-local proof. No laptop service/cloud inference was substituted: llama.rn executed inside the iOS app process.
+- User freed storage; observed 11 GiB at start. iOS prebuild, CocoaPods installation (95 pods), and Debug ARM64 simulator build passed. Native build approximately 4m 03s. App: `.local/t0/ios-build/Build/Products/Debug-iphonesimulator/GurukulT0.app` (99 MiB allocated). Xcode 27.0 / SDK 27.0 targeted iOS 16.4 minimum and ran on iPhone 16 Simulator / iOS 18.1 (22B81). No scene plugin or SDK downgrade was required for this runtime; iOS 27 itself is untested. Simulator.app was absent at the expected Xcode path; execution and screenshots used simctl.
+- Exact runtime pins exercised: Expo 57.0.26, RN 0.86.3, React 19.2.3, expo-constants 57.0.20, expo-dev-client 57.0.19, expo-modules-core 57.0.20, llama.rn 0.9.1. Node 22.23.3, CocoaPods 1.16.2; resolved Hermes pod 250829098.0.17. Package pins/lockfile unchanged. Apple system Vision/PDFKit/CryptoKit are used by the local bridge. Native warnings include upstream deprecated APIs and script-phase notices; no errors.
+- Loaded the existing pinned **Qwen3-0.6B Q4_K_M**, `unsloth/Qwen3-0.6B-GGUF` revision `50968a4468ef4233ed78cd7c3de230dd1d61a56b`, 396,705,472 bytes, Apache-2.0, SHA-256 `ac2d97712095a558e31573f62f466a3f9d93990898b0ec79d7c974c1780d524a`. Native streaming verification passed before loading; provenance remains in `src/t0/model.json`. CPU / two threads / context 2048 / 128 output cap / temperature 0 / seed 42. Native log confirms zero of 29 layers offloaded, despite initial Metal backend discovery.
+- **Actual generated answer:** “Plants use sunlight to make food through photosynthesis.” One synthetic source/question only; not a general quality benchmark. App-observed init 14,261.79 ms (includes backend setup/warmup, excludes prior SHA verification), first token 1,511.07 ms, completion 1,949.16 ms. Resident bytes before/loaded/after: 110,133,248 / 731,398,144 / 618,217,472. These are simulator process snapshots, not peak memory or phone timings. Context release completed.
+- **Integrated image OCR:** 1372.62 ms, 225,705,984 resident bytes. **Integrated scanned-PDF render → OCR:** 735.99 ms, 231,538,688 resident bytes. Both exactly matched the expected synthetic sentence through JavaScript → Expo → Swift; PDF is image-only, no direct text extraction claim.
+- Added explicit debug-simulator-only `--gurukul-t0-smoke` launch opt-in, sharing the app's real inference/OCR calls, with per-operation errors and uniquely named local JSON reports. Disabled in physical/release builds and absent in Expo Go/Android; normal launch does not autorun. TypeScript passed and native wrapper/core compiled in the actual app. No full release benchmark or unrelated suite.
+- Evidence: `.local/t0/t0-smoke-D5F5149B-4257-41F8-A7A4-CD1F4A9D888C.json`, `ios-integrated.stderr`, `ios-integrated-result.png`, `ios-build.log`, `ios-pods.log`. An initial openurl system confirmation prevented activation; restarting the simulator and using Expo's `--initialUrl` launch argument resolved it. Existing user Metro remained untouched. The app was subsequently relaunched without the smoke flag and left installed/running for manual checks.
+- Disk ended around 3.5 GiB free. Files/caches preserved; no cleanup, commit or publish. Physical model/OS/RAM/storage, phone latency/memory, signed iPhone installation and embedded-JS disconnected operation remain pending. Next: use an actual phone for the same bounded T0 checks; do not advance to T1–T9 based only on simulator evidence.
+
+## T0 iOS Simulator check — 2026-10-05
+
+- **Overall red / blocked for a phone demo.** Green requires physical inference; amber requires a working model. Neither is established. No model load, local answer, first-token or inference-memory measurement occurred, and no laptop/cloud inference was substituted.
+- Xcode 27.0 (27A266a), iPhoneSimulator SDK 27.0, CocoaPods 1.16.2 and iOS 18.1 runtime (22B81) are now installed. Booted iPhone 16 simulator `24ADBC7A-2B97-4F8F-AFFF-31AABE92E49D`; it is not an actual demo phone and supplies no physical RAM/storage evidence. Existing project-local Node 22.23.3 and all SDK 57 dependency pins were retained. llama.rn 0.9.1 contains an ARM64 simulator framework slice; this is not runtime compatibility proof.
+- Added local iOS DocumentReader source: streamed SHA-256 verification, bounded printed-English Vision OCR, one-page PDFKit render-to-OCR and resident-memory snapshots. Serial Expo queue, no added package/network inference, Android implementation unchanged. iOS file staging uses app-private Documents. Model artifact/revision/license/size/hash remain unchanged in `src/t0/model.json`.
+- **OCR core simulator smoke passed**, using the actual `LocalDocuments.swift` through `scripts/t0-ios-ocr-smoke.swift`: image 7847.99 ms / 141,426,688 resident bytes; scanned PDF render+OCR 2535.94 ms / 148,307,968 resident bytes. Both recovered exactly “Plants use sunlight to make food through photosynthesis.” These are sequential simulator snapshots, not peak memory or phone benchmarks. JSON: `.local/t0/ios-simulator-ocr.json`; stderr empty. Test copies remain in simulator Documents with unique names.
+- TypeScript passed; Swift core typecheck and executable compilation against the simulator SDK passed; CocoaPods spec Ruby syntax passed; Expo Apple autolinking discovered DocumentReaderModule. Linker emitted a sysroot-platform warning; `vtool` confirmed the executable targets IOSSIMULATOR, minimum 16.4, SDK 27.0, and it executed on iOS 18.1. The Expo wrapper itself is not compiled/tested yet.
+- Full CocoaPods/native app build deliberately not attempted: free space fell from 5.7 GiB at inspection to 4.8 GiB before checks and 2.1 GiB after simulator activity. No files deleted. Simulator was shut down after the test; existing user Metro server was untouched. No dependency install/downgrade, full benchmark, commit or publication.
+- Next: free enough build headroom (suggest 10–15 GiB total), prebuild/install Pods/build the SDK 57 iOS development app, stage the verified GGUF and fixtures, and exercise all three actions through JavaScript. Inspect SDK 57/Xcode 27 scene configuration before building against the newer SDK. Then repeat on a physical device before any phone-demo green/amber claim.
+
+## T0 Android SDK 57 build — 2026-10-05
+
+- **Native build gate passed; physical gates pending.** First SDK 57 ARM64 build succeeded in 16m 14s, 348 tasks executed. No source/dependency compatibility patch or SDK downgrade was needed. This does not establish that inference/OCR works on a phone. T0 green is still unmet; amber also requires actual model execution.
+- APK: `android/app/build/outputs/apk/debug/app-debug.apk`, 127,597,995 bytes. `apksigner verify --verbose` passed (v2 signing). `aapt dump badging` confirmed `org.gurukul.t0`, debug enabled, min API 24, target/compile API 36, ARM64 only. Archive inspection confirmed llama.rn/Expo native libraries and bundled Latin OCR model assets. DocumentReader Kotlin/Java and llama.rn Java/C++ compilation passed.
+- Toolchain: project-local Node 22.23.3, Oracle JDK 17.0.10, Gradle 9.3.1, AGP 8.12.0, Kotlin 2.1.20, platform 36 revision 2, build-tools 36.0.0 (35.0.0 additionally installed by Gradle), NDK 27.1.12297006, existing CMake 3.22.1. JavaScript/runtime pins remain the SDK 57 pins in package.json; llama.rn remains 0.9.1, bundled ML Kit remains 16.0.1.
+- Required tools were installed after inspecting available space. Slow Java archive downloads were interrupted; official archives were fetched directly. Android platform/build-tools/NDK archive SHA-1 values matched Google's repository metadata; Gradle distribution SHA-256 matched its published value. Original generated SDK 54 Android project is preserved in `.local/android-sdk54-backup`; incomplete NDK directory in `.local/android-tools/ndk-27-incomplete-backup`; downloaded archives/logs remain ignored under `.local/android-tools`. No global configuration/Node/JDK selection was changed; SDK packages and Gradle caches were populated for the build.
+- Generated Android project refreshed with SDK 57 `expo prebuild --platform android --no-clean --no-install`. Build command: `./android/gradlew -p android :app:assembleDebug --no-daemon --max-workers=2 -PreactNativeArchitectures=arm64-v8a`, with project-local Node, JAVA_HOME and ANDROID_HOME set as in README. Native build log is `.local/android-tools/build-sdk57.log`. The first invocation warned about missing NODE_ENV; the documented rebuild command sets `NODE_ENV=development`.
+- Warnings retained: SDK XML version mismatch during package discovery, dependency deprecations, manifest replacement notices, and upstream llama.rn C++ warnings including a temporary-string pointer in system-info code. No dependency-warning cleanup or full release benchmark was attempted. Native runtime validation remains necessary.
+- ADB found no attached device throughout this attempt, including after APK verification. User reports an Android phone, but its identity, OS, RAM, free storage and ABI remain unobserved. APK installation, model staging/load/answer, Android OCR/PDF execution, load/first-token/memory measurements and disconnected operation were not run. No model inference on the Mac was substituted. The agent did not start Metro; the user manages it in a separate terminal.
+- Host free space decreased from about 27 GiB to 6.5 GiB during tool installation/caching/build. No cleanup/deletion was performed. Recheck space before another large build.
+- Next: connect/authorize the phone, record device properties, install the debug APK, stage the already-verified model and synthetic fixtures, start `npm run start:dev` in the user's terminal, then run the three T0 actions. Check an embedded-JS build without Metro/connectivity separately before a standalone offline claim.
+
+## T0 evidence — 2026-10-05
+
+**Result: Red / blocked for a phone demo.** This is a host feasibility result, not evidence that a particular phone is unsupported. No authorized Android device or running emulator appeared in `adb devices -l` on either inspection. Actual demo phone, Android version, ABI, RAM and free storage are unknown. No local phone answer was generated; model load time, first-token time and process memory are **not measured**. No laptop/cloud inference or recorded fallback was substituted. T1–T9 remain untouched.
+
+| T0 criterion | Status | Observed evidence |
+|---|---|---|
+| Physical phone loads and answers locally | Pending; green not met | No connected device. GGUF downloaded and verified on host only. |
+| Native development APK compiles | Red | Gradle failed on incomplete NDK 27.1.12297006 (`source.properties` missing); Kotlin compilation also reported `No space left on device`. No APK produced. |
+| Model works, only ingestion blocked | Amber not applicable | Model execution itself remains unverified. |
+| Printed-image OCR | Host pass; Android pending | Apple Vision exactly recovered the synthetic sentence from PNG in 1717.68 ms. |
+| PDF path | Host pass; Android pending | Image-only, one-page PDF had no text layer; PDFKit rendering + Apple Vision exactly recovered the sentence in 162.56 ms total (OCR 74.07 ms). |
+
+### Toolchain and compatibility evidence
+
+- Host: arm64 macOS 26.6.2, build 25G83. Node 22.12.0; npm 10.9.0 (used), pnpm 10.7.0 and Yarn 1.22.19 available. Java/Javac available; selected Oracle JDK 17.0.10; Zulu 11.0.20.1 also installed. ADB 1.0.41 / 34.0.5-10900879.
+- SDK at `~/Library/Android/sdk`; SDK/JDK environment variables initially unset. Platforms 28/33/34 and build-tools 28.0.3/33.0.0/34.0.0 present. NDK 26.1.10909125 has a valid version file; NDK 27.1.12297006 contains only `.installer`. One configured API 34 Pixel 3a AVD exists, but was not started or counted as phone evidence.
+- Generated project requests compile/target SDK 36, build-tools 36.0.0, NDK 27.1.12297006, Kotlin 2.1.20, AGP 8.11.0 and Gradle 8.14.3. SDK 36/build-tools 36.0.0 are absent. No global configuration or SDK packages were changed.
+- Disk was 2.7 GiB free initially, 1.2 GiB immediately before compilation and 183 MiB during failure; a later reading recovered to 4.2 GiB without agent deletion. Space is unstable; make adequate build headroom available before retrying. Existing files were preserved.
+- Exact JavaScript pins: Expo **54.0.37**, React Native **0.81.5**, React **19.1.0**, expo-dev-client **6.0.21**, expo-modules-core **3.0.30**, llama.rn **0.9.1**, TypeScript **5.9.2**, @types/react **19.1.10**. Transitive versions/integrities are in `package-lock.json`. Expo's compatibility check passes, but this is **not a proven native/runtime compatibility matrix**. Initial Expo patch versions were updated following that check.
+- Selected Android ingestion: local Expo module, bundled Latin `com.google.mlkit:text-recognition:16.0.1`, Android platform `PdfRenderer`, one page rendered at 2× before OCR. No direct PDF text extractor selected. Android execution and clean-install/offline behavior remain unverified. Image/PDF/hash operations use Expo's background module queue; bitmap/page/recognizer resources are closed. The spike accepts only staged synthetic fixtures, not general student imports or a camera flow.
+- Expo, React, React Native, llama.rn and @types/react declare MIT; TypeScript declares Apache-2.0. ML Kit's Maven POM specifies [ML Kit Terms of Service](https://developers.google.com/ml-kit/terms), not an open-source license. Bundled OCR is selected to avoid a first-use OCR model download. Native network/telemetry behavior still needs device inspection before an offline/privacy claim.
+
+Primary compatibility references: [Expo SDK 54](https://docs.expo.dev/versions/v54.0.0/), [llama.rn v0.9.1](https://github.com/mybigday/llama.rn/tree/v0.9.1), [bundled ML Kit Android OCR](https://developers.google.com/ml-kit/vision/text-recognition/v2/android), [Android PDF rendering](https://developer.android.com/reference/android/graphics/pdf/PdfRenderer).
+
+### Exact model and inference harness
+
+[Shipped manifest](../../src/t0/model.json): `unsloth/Qwen3-0.6B-GGUF`, revision `50968a4468ef4233ed78cd7c3de230dd1d61a56b`, artifact `Qwen3-0.6B-Q4_K_M.gguf`, **396,705,472 bytes**, SHA-256 `ac2d97712095a558e31573f62f466a3f9d93990898b0ec79d7c974c1780d524a`, Apache-2.0. Quantizer repository metadata declares Apache-2.0; upstream license is pinned separately in the manifest because the quantizer repository does not contain a LICENSE file. [Pinned artifact](https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/blob/50968a4468ef4233ed78cd7c3de230dd1d61a56b/Qwen3-0.6B-Q4_K_M.gguf).
+
+`npm run model:download` completed actual byte-length and streaming SHA-256 verification. The ignored host file is `.local/t0/Qwen3-0.6B-Q4_K_M.gguf`; no model weights enter Git. It has **not been loaded**. The downloader preserves failed partials and refuses overwrites; interrupted downloads require explicit handling, not silent deletion (full installation/recovery is T2).
+
+The single-screen app verifies the staged model again on Android before calling `initLlama`. CPU-only, 2 threads, context 2048, output cap 128, seed 42, temperature 0, built-in chat template with `enable_thinking: false`. Prompt `t0-photosynthesis-1` contains one synthetic fact and an editable short question. The app rejects empty/oversized answers or visible thinking tags, displays plain text for human review, and records load/first-token/completion timings plus before/loaded/after PSS and native heap snapshots. Snapshots are not peak memory. Generation is serialized with OCR; backgrounding interrupts active generation and contexts are released. None of these runtime behaviors are claimed to have passed on a phone.
+
+### Focused checks performed
+
+- `npm install --no-audit --no-fund`: completed; exact direct pins and lockfile recorded.
+- `npm run typecheck`: passed with final dependencies.
+- `EXPO_NO_TELEMETRY=1 npx expo install --check`: passed after patch-version alignment.
+- `npm run prebuild`: generated Android development project successfully. Generated native directory is ignored and reproducible; local module source is included.
+- `npx expo-modules-autolinking resolve --platform android`: found `org.gurukul.t0.DocumentReaderModule`; llama.rn arm64 prebuilt libraries are installed.
+- `EXPO_NO_TELEMETRY=1 npx expo export --platform android`: passed, 576 modules, 1.76 MB Hermes bundle. This is JS bundling, not APK compilation or native validation.
+- From `android/`: `ANDROID_HOME="$HOME/Library/Android/sdk" JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home ./gradlew :app:assembleDebug --offline --no-daemon -PreactNativeArchitectures=arm64-v8a -Pandroid.builder.sdkDownload=false`: failed in 42 seconds with errors above. Offline dependency resolution and disabled SDK downloads bounded disk/network changes; no retry after resource failure.
+- `swift scripts/t0-ingestion.swift`: passed using system Apple Vision/PDFKit (Swift 6.4), writing PNG, scanned PDF and `host-ingestion.json` under `.local/t0`. Expected/recognized sentence: “Plants use sunlight to make food through photosynthesis.” Synthetic clean print only; no handwriting, Bengali, arbitrary PDFs or Android equivalence claim. First OCR includes cold setup; PDF OCR follows it, so timings are not comparable engine benchmarks.
+- Project-scoped changes inspected; parent repository has the entire project untracked, so ordinary `git diff` is empty. No existing lint/test configuration; no full benchmark, release gate, harness audit or phone test was run.
+
+### Resume T0 only
+
+1. Make build disk headroom available and repair/install SDK `platforms;android-36`, `build-tools;36.0.0`, `ndk;27.1.12297006`; preserve existing SDK contents. Connect and authorize the actual demo phone. Capture model/manufacturer, Android release/API, ABI, `/proc/meminfo`, `/data` free space and `dumpsys meminfo org.gurukul.t0`.
+2. Run `npm ci`, `npm run prebuild`, then `ANDROID_HOME="$HOME/Library/Android/sdk" JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home npm run android`. Expo Go cannot run these native modules. Initial dependency/SDK downloads need connectivity. Start Metro via `npm start` if needed.
+3. Stage the three verified/synthetic host files into the debuggable app's private files directory, after installation. These commands are a pending recipe, not executed device evidence:
+
+```sh
+adb shell -T "run-as org.gurukul.t0 sh -c 'cat > files/Qwen3-0.6B-Q4_K_M.gguf'" < .local/t0/Qwen3-0.6B-Q4_K_M.gguf
+adb shell -T "run-as org.gurukul.t0 sh -c 'cat > files/printed.png'" < .local/t0/printed.png
+adb shell -T "run-as org.gurukul.t0 sh -c 'cat > files/printed.pdf'" < .local/t0/printed.pdf
+```
+
+4. Run all three buttons, retain the real answer/recognized text and measurements with the exact phone record. Change the synthetic question to verify a fresh completion. Measure peak memory separately if available. A preinstalled verified model is a disclosed T0 shortcut; T2 download UX remains absent.
+5. Use an embedded-JS build to check inference and bundled OCR without Metro/connectivity before claiming phone-local offline support; dev-client/Metro success alone is insufficient. Keep the focused T0 smoke scope, not the full T8 benchmark. Re-evaluate green/amber/red, then stop and request the next ticket separately.
+
+## Tomorrow's order
+
+1. Lock device/runtime and sample source before UI polish.
+2. Implement one vertical slice: paste → evidence → local explanation → saved message.
+3. Add 3-question quiz, score and source-linked review.
+4. Add the proven file/camera route and model readiness screen.
+5. Reserve the final two hours for standalone build, airplane-mode rehearsal and fallback capture.
+
+Cut in order: animation/voice, flashcards, additional languages, semantic embeddings, whole-document summaries, second platform. Do not cut truthful status, real local inference, correct scores, source provenance, or durability while claiming them.
+
+## Demo script (3–4 minutes)
+
+- “Gurukul turns your own notes into a private study companion.”
+- Show downloaded teacher/model readiness; explain one-time setup.
+- Enable airplane mode and show the standalone app.
+- Import a new short printed page or supported PDF; review extracted text.
+- Explain a selected topic and open its citation.
+- Generate and take three MCQs; deliberately miss one.
+- Show exact score, missed topic and source-linked review.
+- Relaunch and show saved history. State tested phone/language and remaining limitations.
+
+Keep a tested offline source file and charger available. Download models before the venue. A fallback recording must be labeled recorded, with real device evidence.
+
+## Full V1 definition of done
+
+All R01–R14 pass on the declared device/input/language matrix; no undisclosed remote study path; model license/artifact manifest complete; dataset/device/recovery reports attached; typecheck/lint/tests/build results recorded; migration and source-deletion behavior verified; no original research edited.
+
+## First implementation prompt
+
+> Read AGENTS.md, docs/engineering/state.md, and T0 in docs/plans/v1-build.md. Execute only the native/model/ingestion feasibility spike. Inspect the installed toolchain first. Record exact dependency versions, actual device evidence, model provenance and failures. Do not build the full interface until the result identifies a viable path. If a device is unavailable, finish host-side checks and clearly leave physical-device gates pending.

@@ -1,0 +1,17 @@
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+
+group = 'org.gurukul.t0'
+version = '0.0.1'
+
+android {
+  namespace 'org.gurukul.t0.documentreader'
+  defaultConfig {
+    versionCode 1
+    versionName '0.0.1'
+  }
+}
+
+dependencies {
+  implementation 'com.google.mlkit:text-recognition:16.0.1'
+}
