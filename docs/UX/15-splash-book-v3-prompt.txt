@@ -1,0 +1,8 @@
+Mode: built-in image_gen
+Reference: 15-splash-book-v2.png
+
+Edit this exact Gurukul AI portrait splash with ONLY these layout refinements. Preserve the cream watercolor background, top book mascot, wordmark, subtitle, all four feature texts verbatim, icon designs/colors, botanical edges and portrait dimensions.
+1. Reduce ALL FOUR feature icons to roughly 45% of their current width and height. They should be compact colorful inline icons about 70px tall on this 887px-wide reference, not large illustrations. Keep the top main book mascot unchanged.
+2. Increase the clear vertical whitespace between the bottom of "Your AI classroom" and the start of the features to approximately 140px in reference image coordinates (about twice the present gap). First row centered about y=880.
+3. Lay out four neat uniform rows centered around y=880, 1010, 1140, 1270. Small icons in one aligned column at x=235, labels begin around x=305, vertically centered alongside icons. Keep text legible, matching existing sans serif styling. The last label may wrap to two lines within the safe right margin but wording must remain "Clear doubts with free AI buddy".
+Exact rows remain "Add your subjects", "Notes by subject", "Generate quizzes", "Clear doubts with free AI buddy". No new content, no changes to branding or illustration style, no boxes. Achieve a calmer lightweight features section with smaller icons and obvious breathing room below subtitle.

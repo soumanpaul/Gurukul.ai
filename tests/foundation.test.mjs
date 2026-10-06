@@ -28,7 +28,7 @@ function connect(path = ':memory:') {
   return { database, close: () => connection.close() };
 }
 
-test('fresh install and repeated initialization produce seven migrations and one labeled fixture', async () => {
+test('fresh install and repeated initialization produce ten migrations and one labeled fixture', async () => {
   const storage = connect();
   try {
     const first = await initializeFoundation(storage.database);
@@ -36,7 +36,7 @@ test('fresh install and repeated initialization produce seven migrations and one
     assert.equal(first.notebooks[0].id, syntheticNotebook.id);
     const second = await initializeFoundation(storage.database);
     assert.equal(second.notebooks.length, 1);
-    assert.equal((await storage.database.getAllAsync('SELECT * FROM schema_migrations')).length, 7);
+    assert.equal((await storage.database.getAllAsync('SELECT * FROM schema_migrations')).length, 10);
     assert.equal((await storage.database.getFirstAsync('PRAGMA foreign_keys')).foreign_keys, 1);
   } finally { storage.close(); }
 });
@@ -65,7 +65,8 @@ test('failed migration rolls back both DDL and data without losing a profile', a
   try {
     await migrate(storage.database, [foundationMigration]);
     const foundation = { repository: createRepository(storage.database) };
-    const before = await foundation.repository.saveProfile({ nickname: 'Asha', language: 'en' });
+    await storage.database.runAsync('INSERT INTO profile VALUES (?, 1, ?, ?, ?, ?)', 'legacy', 'Asha', 'en', 'before', 'before');
+    const before = await foundation.repository.readProfile();
     await assert.rejects(migrate(storage.database, [foundationMigration, {
       version: 2,
       async apply(transaction) {
@@ -84,10 +85,10 @@ test('future schema and non-contiguous history fail safely, not reset', async ()
   try {
     const foundation = await initializeFoundation(storage.database);
     await foundation.repository.saveProfile({ nickname: 'Keep me', language: 'en' });
-    await storage.database.runAsync('INSERT INTO schema_migrations VALUES (?, ?)', 8, 'future');
+    await storage.database.runAsync('INSERT INTO schema_migrations VALUES (?, ?)', 11, 'future');
     await assert.rejects(initializeFoundation(storage.database), DatabaseVersionError);
     assert.equal((await foundation.repository.readProfile()).nickname, 'Keep me');
-    assert.equal((await storage.database.getAllAsync('SELECT * FROM schema_migrations')).length, 8);
+    assert.equal((await storage.database.getAllAsync('SELECT * FROM schema_migrations')).length, 11);
   } finally { storage.close(); }
 });
 
@@ -116,13 +117,42 @@ test('failed save preserves prior data and database constraints enforce singleto
     const saved = await foundation.repository.saveProfile({ nickname: 'Student', language: 'en' });
     await assert.rejects(foundation.repository.saveProfile({ nickname: '', language: 'en' }));
     await assert.rejects(storage.database.runAsync('UPDATE profile SET preferred_language = ?', 'invalid'));
-    await assert.rejects(storage.database.execAsync("INSERT INTO profile VALUES ('other', 1, 'Other', 'en', 'now', 'now')"));
+    await assert.rejects(storage.database.execAsync("INSERT INTO profile VALUES ('other', 1, 'Other', 'en', 'now', 'now', NULL)"));
     assert.deepEqual(await foundation.repository.readProfile(), saved);
   } finally { storage.close(); }
 });
 
+test('local logout survives restart without deleting profile, notebooks or installed teacher', async () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'gurukul-session-')), 'session.db');
+  const storage = connect(path);
+  const foundation = await initializeFoundation(storage.database);
+  assert.equal(foundation.session, 'welcome');
+  await assert.rejects(foundation.repository.saveSession('active'));
+  const profile = await foundation.repository.saveProfile({nickname:'Keep my notes',language:'en'});
+  const installation = {status:'ready',filename:'kept.gguf',partial:null,received:123};
+  await foundation.models.save(installation);
+  const notebooks = await foundation.repository.listNotebooks();
+  await foundation.repository.saveSession('teacher');
+  assert.equal((await initializeFoundation(storage.database)).session,'teacher');
+  await foundation.repository.saveSession('active');
+  await foundation.repository.saveSession('welcome');
+  await assert.rejects(foundation.repository.saveSession('invalid'));
+  storage.close();
+  const reopened = connect(path);
+  try {
+    const restored = await initializeFoundation(reopened.database);
+    assert.equal(restored.session,'welcome');
+    assert.deepEqual(restored.profile,profile);
+    assert.deepEqual(restored.notebooks,notebooks);
+    assert.deepEqual({...await restored.models.read()},installation);
+    await restored.repository.saveSession('teacher');
+    await restored.repository.saveSession('active');
+    assert.equal(await restored.repository.readSession(),'active');
+  } finally { reopened.close(); }
+});
+
 test('main routes include all foundation destinations', () => {
-  assert.deepEqual([...mainRoutes], ['notebooks', 'study', 'progress', 'settings']);
+  assert.deepEqual([...mainRoutes], ['notebooks', 'buddy', 'study', 'progress', 'settings']);
 });
 
 test('T1 upgrade preserves profile and notebook while model state survives reopen', async () => {
@@ -130,9 +160,11 @@ test('T1 upgrade preserves profile and notebook while model state survives reope
   const path = join(directory, 'models.db');
   const storage = connect(path);
   await migrate(storage.database, [foundationMigration]);
-  const profile = await createRepository(storage.database).saveProfile({ nickname: 'Preserve', language: 'bn' });
+  await storage.database.runAsync('INSERT INTO profile VALUES (?, 1, ?, ?, ?, ?)', 'legacy', 'Preserve', 'bn', 'before', 'before');
+  const profile = await createRepository(storage.database).readProfile();
   const upgraded = await initializeFoundation(storage.database);
   assert.deepEqual(upgraded.profile, profile);
+  assert.equal(upgraded.session, 'active');
   assert.equal(upgraded.notebooks.length, 1);
   const installation = { status: 'downloading', filename: null, partial: 'download-one.partial', received: 200 };
   await upgraded.models.save(installation);
@@ -143,5 +175,27 @@ test('T1 upgrade preserves profile and notebook while model state survives reope
     assert.deepEqual({ ...await foundation.models.read() }, installation);
     assert.deepEqual(foundation.profile, profile);
     await assert.rejects(foundation.models.save({ ...installation, status: 'corrupt' }));
+  } finally { reopened.close(); }
+});
+
+test('avatar selection persists across restart and logout; omitted edits preserve it', async () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'gurukul-avatar-')), 'profile.db');
+  const storage = connect(path);
+  const foundation = await initializeFoundation(storage.database);
+  const saved = await foundation.repository.saveProfile({ nickname: 'Student', language: 'en', avatar: 'boy' });
+  await foundation.repository.saveSession('welcome');
+  storage.close();
+  const reopened = connect(path);
+  try {
+    const next = await initializeFoundation(reopened.database);
+    assert.deepEqual(next.profile, saved);
+    assert.equal((await next.repository.saveProfile({ nickname: 'Edited', language: 'en' })).avatar, 'boy');
+    const changed = await next.repository.saveProfile({ nickname: 'Edited', language: 'en', avatar: 'girl' });
+    assert.equal(changed.avatar, 'girl');
+    assert.equal(changed.id, saved.id);
+    await assert.rejects(next.repository.saveProfile({ nickname: 'Edited', language: 'en', avatar: 'invalid' }));
+    await assert.rejects(reopened.database.runAsync('UPDATE profile SET avatar = ?', 'invalid'));
+    assert.deepEqual(await next.repository.readProfile(), changed);
+    assert.equal(next.notebooks.length, 1);
   } finally { reopened.close(); }
 });

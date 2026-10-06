@@ -8,6 +8,60 @@ final class T7UITests: XCTestCase {
     continueAfterFailure = false
   }
 
+  func finishSplash() {
+    if app.buttons["Next splash"].waitForExistence(timeout: 5) {
+      reach("Next splash").tap()
+      reach("Get Started").tap()
+    }
+  }
+
+  func testSplashStartupAndLogout() throws {
+    app.launch()
+    XCTAssertTrue(app.buttons["Next splash"].waitForExistence(timeout: 20))
+    XCTAssertTrue(app.buttons["Next splash"].isHittable)
+    let first = XCTAttachment(screenshot: app.screenshot())
+    first.name = "First book splash"
+    first.lifetime = .keepAlways
+    add(first)
+    app.buttons["Next splash"].tap()
+    XCTAssertTrue(app.buttons["Get Started"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["Get Started"].isHittable)
+    app.buttons["Back to first splash"].tap()
+    XCTAssertTrue(app.buttons["Next splash"].exists)
+    app.buttons["Next splash"].tap()
+    let second = XCTAttachment(screenshot: app.screenshot())
+    second.name = "Second robot splash"
+    second.lifetime = .keepAlways
+    add(second)
+    app.buttons["Get Started"].tap()
+    if app.textFields["Nickname"].waitForExistence(timeout: 3) { reach("Continue offline").tap() }
+    if app.staticTexts["Meet your digital teacher"].waitForExistence(timeout: 3) {
+      XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+      reach("Continue with my teacher").tap()
+    }
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+    app.otherElements["Settings"].firstMatch.tap()
+    reach("Log out").tap()
+    app.alerts.buttons["Cancel"].tap()
+    XCTAssertFalse(app.buttons["Next splash"].exists)
+    reach("Log out").tap()
+    app.alerts.buttons["Log out"].tap()
+    XCTAssertTrue(app.buttons["Next splash"].waitForExistence(timeout: 10))
+    finishSplash()
+    XCTAssertTrue(app.textFields["Nickname"].waitForExistence(timeout: 10))
+    let name = app.textFields["Nickname"].value as? String
+    app.terminate()
+    app.launch()
+    XCTAssertTrue(app.buttons["Next splash"].waitForExistence(timeout: 20))
+    finishSplash()
+    XCTAssertTrue(app.textFields["Nickname"].waitForExistence(timeout: 10))
+    XCTAssertEqual(app.textFields["Nickname"].value as? String, name)
+    reach("Continue offline").tap()
+    XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+    reach("Continue with my teacher").tap()
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 10))
+  }
+
   func reach(_ label: String) -> XCUIElement {
     let element = app.buttons[label].firstMatch
     for _ in 0..<18 {
@@ -21,6 +75,7 @@ final class T7UITests: XCTestCase {
 
   func testSyntheticNotebookKeyboardAndConfirmedDeletion() throws {
     app.launch()
+    finishSplash()
     XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
     app.buttons["View all notebooks"].tap()
     XCTAssertTrue(app.buttons["Create notebook"].waitForExistence(timeout: 20))
@@ -62,6 +117,7 @@ final class T7UITests: XCTestCase {
   func testLargeTextHomeAccessibility() throws {
     app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
     app.launch()
+    finishSplash()
     XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
     try app.performAccessibilityAudit(for: [.contrast, .sufficientElementDescription, .dynamicType, .textClipped, .hitRegion])
     let screenshot = XCTAttachment(screenshot: app.screenshot())
@@ -72,6 +128,7 @@ final class T7UITests: XCTestCase {
 
   func testImportSheetOpensFilesAndAllowsCancelRetry() throws {
     app.launch()
+    finishSplash()
     let add = app.buttons["Add your notes →"]
     XCTAssertTrue(add.waitForExistence(timeout: 20))
     add.tap()
@@ -96,8 +153,312 @@ final class T7UITests: XCTestCase {
     cancel.tap()
   }
 
+  func testLocalLogoutAndInstalledTeacherReuse() throws {
+    app.launch()
+    finishSplash()
+    if app.textFields["Nickname"].waitForExistence(timeout: 3) {
+      reach("Continue offline").tap()
+    }
+    if app.staticTexts["Meet your digital teacher"].waitForExistence(timeout: 3) {
+      XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+      reach("Continue with my teacher").tap()
+    }
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+    app.otherElements["Settings"].firstMatch.tap()
+    reach("Log out").tap()
+    app.alerts.buttons["Cancel"].tap()
+    XCTAssertTrue(app.buttons["Edit local profile"].exists)
+    reach("Log out").tap()
+    app.alerts.buttons["Log out"].tap()
+    finishSplash()
+    XCTAssertTrue(app.textFields["Nickname"].waitForExistence(timeout: 10))
+    let nickname = app.textFields["Nickname"].value as? String
+    app.terminate()
+    app.launch()
+    finishSplash()
+    XCTAssertTrue(app.textFields["Nickname"].waitForExistence(timeout: 20))
+    XCTAssertEqual(app.textFields["Nickname"].value as? String, nickname)
+    XCTAssertTrue(app.buttons["Continue offline"].isHittable)
+    let welcome = XCTAttachment(screenshot: app.screenshot())
+    welcome.name = "Welcome local profile"
+    welcome.lifetime = .keepAlways
+    add(welcome)
+    let language = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Preferred language:")).firstMatch
+    XCTAssertTrue(language.isHittable)
+    language.tap()
+    XCTAssertTrue(app.alerts["Preferred language"].waitForExistence(timeout: 5))
+    app.alerts.buttons["Cancel"].tap()
+    app.textFields["Nickname"].tap()
+    XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+    app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)).press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)))
+    reach("Continue offline").tap()
+    XCTAssertTrue(app.staticTexts["Meet your digital teacher"].waitForExistence(timeout: 10))
+    let reuse = app.buttons["Continue with my teacher"]
+    XCTAssertTrue(reuse.waitForExistence(timeout: 60))
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "Returning teacher setup"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
+    reach("Continue with my teacher").tap()
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 10))
+    app.terminate()
+    app.launch()
+    finishSplash()
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+  }
+
+  func testStudyChatViewportAndLocalSummary() throws {
+    app.launch()
+    finishSplash()
+    if app.textFields["Nickname"].waitForExistence(timeout: 3) { reach("Continue offline").tap() }
+    if app.staticTexts["Meet your digital teacher"].waitForExistence(timeout: 3) {
+      XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+      reach("Continue with my teacher").tap()
+    }
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+    app.buttons["View all notebooks"].tap()
+    let notebook = app.buttons.matching(NSPredicate(format: "label == %@", "Open notebook T4 study · synthetic")).firstMatch
+    for _ in 0..<15 {
+      if notebook.exists && notebook.isHittable { break }
+      app.scrollViews.firstMatch.swipeUp()
+    }
+    guard notebook.exists && notebook.isHittable else { throw XCTSkip("Existing T4 synthetic notebook unavailable; do not change user sources.") }
+    notebook.tap()
+    app.otherElements["Study"].firstMatch.tap()
+    for label in ["Choose study section", "Summarize", "Explain", "Ask", "Quiz", "Give me a hint", "Check my understanding", "Ask my notes"] {
+      XCTAssertTrue(app.buttons[label].isHittable, "Viewport action: " + label)
+    }
+    app.buttons["Choose study section"].tap()
+    let section = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Synthetic plant facts · p.")).firstMatch
+    XCTAssertTrue(section.waitForExistence(timeout: 5))
+    section.tap()
+    let completions = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "summary · complete"))
+    let before = completions.count
+    app.buttons["Summarize"].tap()
+    expectation(for: NSPredicate { _, _ in completions.count > before }, evaluatedWith: app)
+    waitForExpectations(timeout: 120)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "Local study chat summary"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
+    app.buttons["Give me a hint"].tap()
+    XCTAssertTrue(app.alerts["A hint from your notes"].waitForExistence(timeout: 5))
+    app.alerts.buttons["Cancel"].tap()
+    app.buttons["Check my understanding"].tap()
+    XCTAssertTrue(app.staticTexts["Practice from your notes"].waitForExistence(timeout: 5))
+    reach("← Back to study").tap()
+    app.otherElements["History"].firstMatch.tap()
+    XCTAssertTrue(app.staticTexts["Study history"].waitForExistence(timeout: 5))
+  }
+
+  func testStudyChatKeyboardAskAndCitation() throws {
+    app.launch()
+    finishSplash()
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+    app.buttons["View all notebooks"].tap()
+    let notebook = app.buttons.matching(NSPredicate(format: "label == %@", "Open notebook T4 study · synthetic")).firstMatch
+    for _ in 0..<15 {
+      if notebook.exists && notebook.isHittable { break }
+      app.scrollViews.firstMatch.swipeUp()
+    }
+    guard notebook.exists && notebook.isHittable else { throw XCTSkip("Existing synthetic notebook unavailable.") }
+    notebook.tap()
+    app.otherElements["Study"].firstMatch.tap()
+    let completions = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "ask · complete"))
+    let before = completions.count
+    let question = app.textViews.matching(NSPredicate(format: "label BEGINSWITH %@", "Question or topic from your notes")).firstMatch
+    XCTAssertTrue(question.waitForExistence(timeout: 5))
+    XCTAssertTrue(question.isHittable)
+    question.tap()
+    question.typeText("What do roots absorb?\n")
+    expectation(for: NSPredicate { _, _ in completions.count > before }, evaluatedWith: app)
+    waitForExpectations(timeout: 120)
+    let citations = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "View source"))
+    XCTAssertGreaterThan(citations.count, 0)
+    let citation = citations.element(boundBy: citations.count - 1)
+    for _ in 0..<5 {
+      if citation.isHittable { break }
+      app.scrollViews.element(boundBy: 1).swipeUp()
+    }
+    XCTAssertTrue(citation.isHittable)
+    citation.tap()
+    XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Saved revision ")).firstMatch.exists)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "Local chat answer and citation"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
+  }
+
+  func testStudyChatSavedCitation() throws {
+    app.launch()
+    finishSplash()
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+    app.buttons["View all notebooks"].tap()
+    let notebook = app.buttons.matching(NSPredicate(format: "label == %@", "Open notebook T4 study · synthetic")).firstMatch
+    for _ in 0..<15 {
+      if notebook.exists && notebook.isHittable { break }
+      app.scrollViews.firstMatch.swipeUp()
+    }
+    guard notebook.exists && notebook.isHittable else { throw XCTSkip("Existing synthetic notebook unavailable.") }
+    notebook.tap()
+    app.otherElements["Study"].firstMatch.tap()
+    let citations = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "View source"))
+    XCTAssertGreaterThan(citations.count, 0)
+    let citation = citations.element(boundBy: citations.count - 1)
+    for _ in 0..<10 {
+      if citation.isHittable { break }
+      let conversation = app.scrollViews.element(boundBy: 1)
+      let target = citation.frame.midY < conversation.frame.minY ? 0.75 : 0.25
+      conversation.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 0.05, thenDragTo: conversation.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: target)))
+    }
+    XCTAssertTrue(citation.isHittable)
+    citation.tap()
+    XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Saved revision ")).firstMatch.exists)
+    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    screenshot.name = "Saved local summary citation"
+    screenshot.lifetime = .keepAlways
+    add(screenshot)
+  }
+
+  func testBuddyIntroductionToChat() throws {
+    app.launch()
+    finishSplash()
+    XCTAssertTrue(app.otherElements["AI Buddy"].firstMatch.waitForExistence(timeout: 20))
+    app.otherElements["AI Buddy"].firstMatch.tap()
+    let start = app.buttons["buddy-get-started"]
+    XCTAssertTrue(start.waitForExistence(timeout: 5))
+    XCTAssertTrue(start.isHittable)
+    XCTAssertFalse(app.buttons["AI Buddy chat history"].exists)
+    let welcome = XCTAttachment(screenshot: app.screenshot())
+    welcome.name = "Buddy introduction reference 16"
+    welcome.lifetime = .keepAlways
+    add(welcome)
+    start.tap()
+    XCTAssertTrue(app.buttons["AI Buddy chat history"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["Explore"].isHittable)
+    XCTAssertTrue(app.textViews.matching(NSPredicate(format: "label BEGINSWITH %@", "Message AI Buddy")).firstMatch.isHittable)
+    app.buttons["AI Buddy chat history"].tap()
+    XCTAssertTrue(app.buttons["Close chat history"].waitForExistence(timeout: 5))
+    app.buttons["Close chat history"].tap()
+    let chat = XCTAttachment(screenshot: app.screenshot())
+    chat.name = "Existing Buddy chat after Get Started"
+    chat.lifetime = .keepAlways
+    add(chat)
+    app.otherElements["Home"].firstMatch.tap()
+    app.otherElements["AI Buddy"].firstMatch.tap()
+    XCTAssertTrue(start.waitForExistence(timeout: 5))
+  }
+
+  func testBuddyLocalConversationAndHistory() throws {
+    app.launch()
+    finishSplash()
+    if app.textFields["Nickname"].waitForExistence(timeout: 3) { reach("Continue offline").tap() }
+    if app.staticTexts["Meet your digital teacher"].waitForExistence(timeout: 3) {
+      XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+      reach("Continue with my teacher").tap()
+    }
+    app.otherElements["AI Buddy"].firstMatch.tap()
+    app.buttons["buddy-get-started"].tap()
+    for label in ["AI Buddy chat history", "New AI Buddy chat", "Review practice", "Practice", "Explore", "Send to AI Buddy"] {
+      XCTAssertTrue(app.buttons[label].isHittable, label)
+    }
+    let welcome = XCTAttachment(screenshot: app.screenshot())
+    welcome.name = "AI Buddy welcome"
+    welcome.lifetime = .keepAlways
+    add(welcome)
+    let question = app.textViews.matching(NSPredicate(format: "label BEGINSWITH %@", "Message AI Buddy")).firstMatch
+    let first = "For this test, my favorite planet is Mars. Remember it."
+    question.tap()
+    question.typeText(first + "\n")
+    let complete = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "buddy-status-", "complete"))
+    expectation(for: NSPredicate { _, _ in complete.count == 1 }, evaluatedWith: app)
+    waitForExpectations(timeout: 90)
+    question.tap()
+    question.typeText("Which planet did I mention?\n")
+    expectation(for: NSPredicate { _, _ in complete.count == 2 }, evaluatedWith: app)
+    waitForExpectations(timeout: 90)
+    let answers = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "buddy-answer-"))
+    XCTAssertTrue(answers.firstMatch.label.lowercased().contains("mars"))
+    let conversation = XCTAttachment(screenshot: app.screenshot())
+    conversation.name = "AI Buddy real local follow-up"
+    conversation.lifetime = .keepAlways
+    add(conversation)
+    app.buttons["New AI Buddy chat"].tap()
+    XCTAssertTrue(app.staticTexts["Hello! What can I help you learn?"].waitForExistence(timeout: 5))
+    app.terminate()
+    app.launch()
+    finishSplash()
+    app.otherElements["AI Buddy"].firstMatch.tap()
+    app.buttons["buddy-get-started"].tap()
+    app.buttons["AI Buddy chat history"].tap()
+    let saved = app.buttons["Open chat " + first].firstMatch
+    XCTAssertTrue(saved.waitForExistence(timeout: 5))
+    app.buttons["Delete chat " + first].firstMatch.tap()
+    app.alerts.buttons["Cancel"].tap()
+    saved.tap()
+    XCTAssertEqual(complete.count, 2)
+    XCTAssertTrue(answers.firstMatch.label.lowercased().contains("mars"))
+  }
+
+  func testProfileAvatarSelectionAndPersistence() throws {
+    app.launch()
+    finishSplash()
+    if app.textFields["Nickname"].waitForExistence(timeout: 3) { reach("Continue offline").tap() }
+    if app.staticTexts["Meet your digital teacher"].waitForExistence(timeout: 3) { reach("Continue with my teacher").tap() }
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+    app.otherElements["Settings"].firstMatch.tap()
+    reach("Log out").tap()
+    app.alerts.buttons["Log out"].tap()
+    finishSplash()
+    XCTAssertTrue(app.textFields["Nickname"].waitForExistence(timeout: 10))
+    let nickname = app.textFields["Nickname"].value as? String
+    let boy = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Boy avatar")).firstMatch
+    let girl = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Girl avatar")).firstMatch
+    XCTAssertTrue(boy.isHittable)
+    XCTAssertTrue(girl.isHittable)
+    boy.tap()
+    XCTAssertTrue(app.descendants(matching: .any)["profile-avatar-boy-selected"].exists)
+    girl.tap()
+    XCTAssertTrue(app.descendants(matching: .any)["profile-avatar-girl-selected"].exists)
+    let welcome = XCTAttachment(screenshot: app.screenshot())
+    welcome.name = "Selected girl avatar on welcome"
+    welcome.lifetime = .keepAlways
+    add(welcome)
+    app.textFields["Nickname"].tap()
+    XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+    app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45)).press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)))
+    reach("Continue offline").tap()
+    XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+    reach("Continue with my teacher").tap()
+    app.otherElements["Settings"].firstMatch.tap()
+    reach("Edit local profile").tap()
+    XCTAssertTrue(app.descendants(matching: .any)["profile-avatar-girl-selected"].exists)
+    XCTAssertEqual(app.textFields["Nickname"].value as? String, nickname)
+    boy.tap()
+    reach("Save profile").tap()
+    XCTAssertTrue(app.staticTexts["Saved on this device."].waitForExistence(timeout: 5))
+    app.terminate()
+    app.launch()
+    finishSplash()
+    XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
+    app.otherElements["Settings"].firstMatch.tap()
+    let settings = XCTAttachment(screenshot: app.screenshot())
+    settings.name = "Saved boy avatar in Settings after relaunch"
+    settings.lifetime = .keepAlways
+    add(settings)
+    reach("Log out").tap()
+    app.alerts.buttons["Log out"].tap()
+    finishSplash()
+    XCTAssertTrue(app.descendants(matching: .any)["profile-avatar-boy-selected"].waitForExistence(timeout: 10))
+    XCTAssertEqual(app.textFields["Nickname"].value as? String, nickname)
+    reach("Continue offline").tap()
+    XCTAssertTrue(app.buttons["Continue with my teacher"].waitForExistence(timeout: 60))
+    reach("Continue with my teacher").tap()
+  }
+
   func testBottomTabsShowSelectedState() throws {
     app.launch()
+    finishSplash()
     XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
     for label in ["Home", "Progress", "Settings", "Home"] {
       let tab = app.otherElements[label].firstMatch
@@ -116,6 +477,7 @@ final class T7UITests: XCTestCase {
 
   func testSettingsOverviewAndSafeNavigation() throws {
     app.launch()
+    finishSplash()
     XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
     app.otherElements.matching(NSPredicate(format: "label CONTAINS %@", "Settings")).firstMatch.tap()
     XCTAssertTrue(app.buttons["Edit local profile"].waitForExistence(timeout: 5))
@@ -145,6 +507,7 @@ final class T7UITests: XCTestCase {
 
   func testProgressResultOverviewAndHistory() throws {
     app.launch()
+    finishSplash()
     XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
     app.otherElements.matching(NSPredicate(format: "label CONTAINS %@", "Progress")).firstMatch.tap()
     XCTAssertTrue(app.staticTexts["Practice complete"].waitForExistence(timeout: 10))
@@ -166,6 +529,7 @@ final class T7UITests: XCTestCase {
 
   func testHomeImportRequiresDestination() throws {
     app.launch()
+    finishSplash()
     XCTAssertTrue(app.buttons["Paste text"].waitForExistence(timeout: 20))
     for label in ["Add your notes →", "Open add notes options", "Choose a file", "Use camera", "Paste text"] {
       app.buttons[label].tap()
@@ -190,6 +554,7 @@ final class T7UITests: XCTestCase {
 
   func testHomeReadyActionsFitWithoutVerticalScrolling() throws {
     app.launch()
+    finishSplash()
     XCTAssertTrue(app.buttons["View all notebooks"].waitForExistence(timeout: 20))
     for label in ["Create notebook", "View all notebooks", "Scroll notebooks left", "Scroll notebooks right", "Add your notes →", "Choose a file", "Use camera", "Paste text"] {
       XCTAssertTrue(app.buttons[label].isHittable, "Home action must fit the viewport: " + label)

@@ -5,9 +5,10 @@ import { withNativeSlot } from '../services/native-slot';
 import { sourceUri } from './imports/native';
 import { getStudyManager } from './model/study';
 import { getQuizManager } from './model/quiz';
+import { getBuddyManager } from './model/buddy';
 
 export async function withIdleStudy<Result>(foundation: Foundation, work: () => Promise<Result>) {
-  if (getStudyManager(foundation).snapshot().busy || getQuizManager(foundation).snapshot().busy) throw new Error('BUSY');
+  if (getStudyManager(foundation).snapshot().busy || getQuizManager(foundation).snapshot().busy || getBuddyManager(foundation).snapshot().busy) throw new Error('BUSY');
   return withNativeSlot(work);
 }
 

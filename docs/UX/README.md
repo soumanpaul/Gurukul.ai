@@ -17,12 +17,28 @@ Created 2026-10-05 using the built-in image generation tool, based on [V1 scope]
 | [11 — History tab](11-history-tab.png) | Saved turns with interrupted status, expanded answer/source and empty history; [interaction notes](11-history-tab.md) |
 | [12 — Digital teacher](12-digital-teacher.md) | Student-facing robot teacher setup, [transparent avatar](12-digital-teacher-avatar.png), download/recovery handoff |
 | [13 — Settings overview](13-settings-overview.md) | Board 03 Settings implementation, generated profile avatar, actual model status, profile/model/storage detail routes and confirmed deletion |
+| [14 — Welcome profile](14-welcome-profile.md) | Board 01 v2 first-screen composition, open-book watercolor background, selectable circular Boy/Girl avatars persisted locally and reused in Settings, native name/language form and keyboard-safe Continue |
+| [15 — AI Buddy](15-ai-buddy.md) | Separate local general chat, robot welcome, bounded multi-turn context, saved conversations and confirmed chat deletion; translucent cream/teal adaptation of screens 2–3 of the [saved reference](16-buddy-glass-reference.png); screen 1 reserved for splash |
 
 ## Ongoing design rule
 
+Startup/logout now follows [the two approved splash screens](splash/README.md): book → robot → saved profile/setup/Home destination. Confirmed logout returns to the first book splash. These references supersede earlier design-only splash navigation notes; native OS launch art remains separate.
+
+Launcher branding: [17 — App icon and name](17-app-branding.md), using the established digital-teacher robot and the native label “Gurukul AI”.
+
+Additional welcome variant: [splash2](splash2.png), titled “Meet your Digital Study Buddy”, with “Learn, practise and clear doubts together.” Original welcome artwork is unchanged. Generated with built-in imagegen; [prompt](splash2-prompt.txt). Visually reviewed; design only.
+
+Current first introduction screen: [Book v4 with Next](15-splash-book-v4.png), retaining compact feature icons and subtitle spacing. Supersedes earlier book-splash versions for the interactive introduction.
+
+Robot welcome: [16 — AI buddy welcome](16-ai-buddy-welcome.md), with [portrait screen](16-ai-buddy-welcome.png), adapts the supplied welcome reference to existing cream/teal Gurukul styling.
+
+Latest book splash: [feature version v3](15-splash-book-v3.png) uses smaller colorful subject, notes, quiz and AI-buddy icons with more space below “Your AI classroom”; see [splash notes](15-splash-screens.md).
+
+Splash concepts: [15 — Splash screens](15-splash-screens.md), with [book](15-splash-book.png) and [digital teacher](15-splash-digital-teacher.png) alternatives. These are launch design references, not installed native splash screens.
+
 Execution ownership: [Required UX delivery T0–T7](../plans/v1-build.md#required-ux-delivery-t0t7). Every build prompt and project skill routes here from the start. T0 reads the direction without expanding its spike; T1 establishes the shared shell; T2 teacher setup; T3 Home/import/library; T4 study/History; T5 quiz; T6 result/progress; T7 Settings/resilience and cross-screen audit. Designs marked design-only remain implementation obligations in their owning ticket, not proven completion. The harness validates references/routing, not visual fidelity.
 
-Teacher setup exception requested 2026-10-06: use the sci-fi robot avatar and simple student-facing copy in reference 12. Hide model/configuration details from the introduction; retain accessible attribution and honest download/readiness states in the supporting flow.
+Robot exception requested 2026-10-06: use the approved robot for teacher setup (reference 12) and AI Buddy (reference 15). Notebook Study retains its book. Hide model/configuration details from the introduction; retain accessible attribution and honest setup/readiness states.
 
 All future Gurukul UI/UX work follows this folder as the canonical reference. Reuse the established palette, typography, cards, navigation and book character, including the generated implementation assets in `assets/illustrations/`. When a new feature needs an unrepresented screen or state, add its design/reference and interaction notes here and update the board index above. Keep the same look and feel; do not redesign the app independently for each ticket. Visual references never override accessibility, honest runtime states or offline/data-integrity requirements.
 
@@ -30,7 +46,7 @@ All future Gurukul UI/UX work follows this folder as the canonical reference. Re
 
 Welcome → local nickname → teacher download or Explore first → home → notebook → import → review extracted text → save → study → quiz → results → supporting notes → fresh practice.
 
-- Use Home / Progress / Settings as primary navigation. Within notebooks use Sources / Study / History. Keep conversations persistent.
+- Use Home / AI Buddy / Progress / Settings as primary navigation. Within notebooks use Sources / Study / History. Keep conversations persistent. General AI Buddy does not silently replace source-backed Study.
 - Active bottom tab uses a filled teal icon on a pale-green pill, bold teal label and short teal underline; inactive tabs use gray outline icons and regular labels. Expose the selected tab to screen readers, keep touch targets at least 48 dp, and do not animate or flash the highlight.
 - Explore first permits import and browsing. Until the model is validated and loaded, explain why AI actions are unavailable. Download screens also need progress, cancel, retry, storage failure and verification failure states.
 - OCR text stays editable before indexing. Camera denial must leave File and Paste usable. PDF/image/camera availability depends on native feasibility checks.

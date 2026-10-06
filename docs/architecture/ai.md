@@ -34,6 +34,10 @@ JSON-schema decoding is followed by strict application validation: exact keys/st
 
 Migration 4 stores each notebook's study turns, selected evidence/revisions, coverage, model identity/revision/hash/runtime, prompt version/token count, timestamps and terminal status. A turn is persisted before work; final answer is validated again inside the commit transaction. Cancel/background loss discards late output; interrupted active turns recover at startup. Unvalidated token streaming is intentionally hidden. History keeps failed/cancelled turns and old revision excerpts; retry makes a new turn. UI currently shows the latest 100 turns, without pagination or conversational coreference. No quiz/scoring work is included.
 
+## Separate AI Buddy conversation
+
+General-chat extension: [ADR-002](../decisions/ADR-002-local-ai-buddy.md) defines separate AI Buddy history/context and validation. It explicitly uses general model knowledge, never as a fallback for failed notebook retrieval. Source-backed Study remains unchanged.
+
 ## Optional semantic retrieval gate
 
 Only add embeddings if measured recall on paraphrases is inadequate. Evaluate a multilingual model/export supported by the chosen native runtime; record license, dimensions, pooling, normalization, token limit and truncation behavior.

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { BackHandler, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { Alert, BackHandler, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { File } from 'expo-file-system';
 import { getReader } from '../../t0/native';
@@ -23,7 +23,7 @@ const emptyState = { busy: false, progress: '', error: '', jobId: '' };
 const noopSubscribe = () => () => {};
 const emptySnapshot = () => emptyState;
 
-export function LibraryScreen({ foundation, viewportHeight = 0 }: { foundation: Foundation; viewportHeight?: number }) {
+export function LibraryScreen({ foundation, viewportHeight = 0, onNavigate }: { foundation: Foundation; viewportHeight?: number; onNavigate?(): void }) {
   const reducedMotion = useReducedMotion();
   const { width, fontScale } = useWindowDimensions();
   const wide = wideNotebook(width, fontScale);
@@ -140,9 +140,9 @@ export function LibraryScreen({ foundation, viewportHeight = 0 }: { foundation: 
       onViewAll={() => setShowAll(true)}
       onAdd={kind => { if (!locked) { setError(''); setPendingInput(kind); setSheet('destination'); } }}
     /> : <>
-      <View style={design.row}><Pressable accessibilityLabel="Back to notebooks" accessibilityRole="button" style={design.iconButton} onPress={() => setNotebook(null)}><Feather name="arrow-left" size={24} /></Pressable><Text style={[design.section, { flex: 1 }]}>{notebook.title}</Text><View style={design.badge}><Text style={design.badgeText}>Local sources</Text></View></View>
-      <View style={design.tabs}>{(['Sources','Study','History'] as const).map(item => <Pressable accessibilityRole="tab" accessibilityLabel={item} accessibilityState={{ selected: tab === item }} key={item} style={[design.tab, tab === item && design.activeTab]} onPress={() => setTab(item)}><Feather name={item === 'Sources' ? 'folder' : item === 'Study' ? 'book-open' : 'clock'} size={19} color="#075e63" /><Text style={[styles.note, { flexShrink: 1 }]}>{item}</Text></Pressable>)}</View>
-      {tab !== 'Sources' ? <NotebookStudy foundation={foundation} notebook={notebook.id} historyOnly={tab === 'History'} /> : <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20 }}><View style={{ flex: 1, minWidth: 0, gap: 16 }}>
+      <View style={design.row}><Pressable accessibilityLabel="Back to notebooks" accessibilityRole="button" style={design.iconButton} onPress={() => setNotebook(null)}><Feather name="arrow-left" size={24} /></Pressable><Text style={[design.section, { flex: 1 }]}>{notebook.title}</Text><Pressable accessibilityRole="button" accessibilityLabel="Teacher availability" style={design.badge} onPress={() => Alert.alert('Local teacher', readiness)}><Text style={design.badgeText}>{offlineReady ? '✓ Ready offline' : 'Setup needed'}</Text></Pressable>{tab === 'Study' && <Pressable accessibilityRole="button" accessibilityLabel="Notebook study options" style={design.iconButton} onPress={() => Alert.alert('Study options', 'Answers use only your selected notes. Previous conversations remain in History.', [{ text: 'Choose sources', onPress: () => { setTab('Sources'); onNavigate?.(); } }, { text: 'Open history', onPress: () => { setTab('History'); onNavigate?.(); } }, { text: 'Cancel', style: 'cancel' }])}><Feather name="more-vertical" size={20} color="#075e63"/></Pressable>}</View>
+      <View style={design.tabs}>{(['Sources','Study','History'] as const).map(item => <Pressable accessibilityRole="tab" accessibilityLabel={item} accessibilityState={{ selected: tab === item }} key={item} style={[design.tab, tab === item && design.activeTab]} onPress={() => { setTab(item); onNavigate?.(); }}><Feather name={item === 'Sources' ? 'folder' : item === 'Study' ? 'book-open' : 'clock'} size={19} color="#075e63" /><Text style={[styles.note, { flexShrink: 1, fontWeight: tab === item ? '700' : '400' }]}>{item}</Text></Pressable>)}</View>
+      {tab !== 'Sources' ? <NotebookStudy key={notebook.id} foundation={foundation} notebook={notebook.id} historyOnly={tab === 'History'} viewportHeight={viewportHeight} /> : <View style={{ flexDirection: wide ? 'row' : 'column', gap: 20 }}><View style={{ flex: 1, minWidth: 0, gap: 16 }}>
       <View style={design.sourceHero}><Text style={[styles.body, { flex: 1 }]}>Add your notes, textbook pages or class materials.{ '\n' }Review them here, on your device.</Text><Image source={mascot} style={{ width: 108, height: 118 }} accessible={false} /></View>
       <View style={design.row}><Text style={design.section}>Selected sources</Text><Text style={styles.note}>{sources.filter(source => source.selected && source.status !== 'duplicate').length} selected</Text></View>
       {!sources.length && <Text style={styles.note}>No sources yet. Add a file, photo or pasted text.</Text>}
@@ -153,6 +153,7 @@ export function LibraryScreen({ foundation, viewportHeight = 0 }: { foundation: 
         <Feather name="chevron-right" size={20} color="#77817e" />
       </View>)}
       <Action title="＋  Add your notes" disabled={locked} onPress={() => setSheet('add')} />
+      <Action title="Study selected notes" disabled={locked || !sources.some(source => source.selected && source.status === 'ready')} onPress={() => { setTab('Study'); onNavigate?.(); }} />
       <Text style={design.section}>Find text in selected sources</Text>
       <TextInput accessibilityLabel="Search reviewed source text" value={search} onChangeText={setSearch} placeholder="Search your saved notes…" style={styles.input} maxLength={120} />
       <Action title="Search on this device" secondary disabled={locked || !search.trim()} onPress={() => { void perform(async () => { const result = await repository.search(notebook.id, search); setMatches(result); setNotice(result.length ? '' : 'No matching reviewed text in selected sources. Save reviewed pages first.'); }); }} />
@@ -162,7 +163,7 @@ export function LibraryScreen({ foundation, viewportHeight = 0 }: { foundation: 
     {(error || work.error) && <Text accessibilityRole="alert" style={styles.error}>{error || work.error}</Text>}
     {notice ? <View style={design.notice}><Text style={styles.note}>{notice}</Text></View> : null}
     {work.busy && <Card><Text accessibilityLiveRegion="polite" style={styles.body}>{work.progress}</Text><Action title="Cancel import" secondary onPress={() => manager?.cancel()} /></Card>}
-    {notebook && <Text style={styles.note}>{importHelp}</Text>}
+    {notebook && tab === 'Sources' && <Text style={styles.note}>{importHelp}</Text>}
     <Modal visible={sheet !== null} transparent animationType={reducedMotion ? 'none' : 'slide'} onDismiss={sheetDismissal.didDismiss} onRequestClose={() => setSheet(null)}>
       <KeyboardAvoidingView style={design.scrim} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}><View style={design.sheet}><View style={design.handle} /><View style={design.row}><Text style={design.section}>{sheet === 'notebook' ? 'New notebook' : sheet === 'paste' ? 'Paste your notes' : 'Add your notes'}</Text><Pressable accessibilityRole="button" accessibilityLabel="Close import options" style={design.iconButton} onPress={() => { Keyboard.dismiss(); setSheet(null); }}><Feather name="x" size={22} /></Pressable></View>
         <ScrollView style={{ flexShrink: 1 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">

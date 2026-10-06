@@ -1,0 +1,5 @@
+Mode: built-in image_gen
+Reference: 12-digital-teacher-avatar.png
+Final selected robot icon prompt:
+
+Use case: logo-brand. Create a production iPhone app icon for Gurukul AI using the EXACT friendly digital-teacher robot identity in the reference. Square 1024x1024, opaque full-bleed deep teal background, subtle cyan halo for a polished AI digital feel. Large head-and-upper-torso robot portrait, pearl-white rounded shell, glossy midnight visor, two glowing cyan upside-down-U happy eyes, small cyan smile, teal ear details. Show one small waving hand beside head and a compact teal book with cream leaf emblem tucked at the lower right; prioritize the face and simplify book/hand detail to read at tiny home-screen icon size. Premium softly dimensional 3D finish; friendly and intelligent, matching our existing avatar. Face centered, character about 78% of canvas, generous corner-safe inset. No full-body tiny robot, no lettering, no wordmark, no UI, no circuit clutter, no wallpaper leaves. Do not draw rounded outer corners; iOS applies its own mask. No transparency. This must strongly communicate our established AI robot teacher, not a book-only logo.

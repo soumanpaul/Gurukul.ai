@@ -6,10 +6,13 @@ import { studyMigration } from './migrations/004-study.ts';
 import { quizMigration } from './migrations/005-quizzes.ts';
 import { progressMigration } from './migrations/006-progress.ts';
 import { cleanupMigration } from './migrations/007-cleanup.ts';
+import { localSessionMigration } from './migrations/008-local-session.ts';
+import { buddyMigration } from './migrations/009-buddy.ts';
+import { profileAvatarMigration } from './migrations/010-profile-avatar.ts';
 
 export class DatabaseVersionError extends Error {}
 
-export async function migrate(database: Database, migrations: readonly Migration[] = [foundationMigration, modelMigration, importsMigration, studyMigration, quizMigration, progressMigration, cleanupMigration]) {
+export async function migrate(database: Database, migrations: readonly Migration[] = [foundationMigration, modelMigration, importsMigration, studyMigration, quizMigration, progressMigration, cleanupMigration, localSessionMigration, buddyMigration, profileAvatarMigration]) {
   if (migrations.some((migration, index) => migration.version !== index + 1)) {
     throw new DatabaseVersionError('Migration versions must be contiguous.');
   }

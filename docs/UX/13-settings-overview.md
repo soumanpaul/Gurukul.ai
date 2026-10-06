@@ -8,6 +8,7 @@ Implements board 03's third screen with warm cream cards, serif section headings
 - Privacy opens limitations and synthetic diagnostics. The overview explains local content and uninstall loss.
 - Delete study data opens selection of a notebook/source, not a bulk deletion. The existing named impact preview and confirmation remain mandatory; model/profile stay. Opening or backing out changes no records.
 - Detailed pages have Back to settings and Android Back. Navigation resets scroll; long names and accessibility text wrap and scroll without clipping. Keep Home/Progress/Settings navigation unchanged.
+- Log out is separate from deletion: confirm a return to the welcome/profile page, retaining this single local workspace and teacher. Explain that this is local sign-out, not authentication, security locking or cloud backup. The persisted welcome → teacher → active flow in reference 12 reuses the verified model, never auto-downloads it.
 
 ## Generated asset
 

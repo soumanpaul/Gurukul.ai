@@ -4,6 +4,16 @@ Companion to board 02, not a new visual direction. Reuse the warm paper backgrou
 
 ## Study
 
+### Board-02 chat layout amendment (2026-10-06)
+
+The third phone in board 02 is the current Study visual reference, superseding the stacked action layout below. After choosing reviewed sources, Study selected notes opens Study with notebook header/actual availability badge, Sources/Study/History tabs, source/section and English chips, compact Summarize/Explain/Ask/Quiz actions, green user bubbles, cream teacher replies with the approved local book character, inspectable source accordions, hint/understanding actions and rounded composer/send control. Reuse existing book PNG and Feather vector icons; no new logo or generated raster icons are needed.
+
+Phone height determines the conversation viewport; only messages scroll at normal text sizes, keeping the composer and action rows visible. Small screens and large type may scroll rather than shrink text to unreadability. Wide layouts retain the right-hand saved-history panel. Source selection lives in a dismissible scrollable modal, not a hundred inline buttons. Summarize requires an explicit section and remains labeled section-only. Source chip displays the real source title for a single source, count for multiple sources, or chosen title/page; language is the supported English path, not an untested profile preference.
+
+Ask sends the typed question through the existing local lexical retrieval/model/validator. Explain uses the same validated source-exact path, not free-form teaching. Hint explains that supporting text may reveal the answer and leads to entering a topic for Explain. Check my understanding opens the persisted source-backed quiz flow; it does not diagnose or grade free-text understanding. No decorative inactive controls or cloud fallback. The actual current engine limitation is visible beside the actions and explained by the English chip.
+
+Saved conversation bubbles remain notebook-scoped (latest 100, chronological in Study), with status/date and inspectable immutable evidence. They can contain earlier source selections; new requests use only currently selected active revisions. Prior conversation is not injected into the model: each question must name its topic. Rich conversational coreference and free-form explanatory/hint quality remain unimplemented release gaps, not implied by the chat appearance. Cancellation, error, refusal and interrupted states remain visible; no unvalidated token streaming. History retains full scope and revision details.
+
 ```text
 ← Notebook                         Local sources
 Sources          Study [active]          History

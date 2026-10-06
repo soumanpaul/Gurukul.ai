@@ -46,6 +46,17 @@ test('confirmed model removal refuses loaded contexts, preserves failures and tr
   assert.equal(sample.manager.snapshot().filename, null);
 });
 
+test('returning onboarding verifies and reuses installed teacher without downloading', async () => {
+  const sample = fixture({}, {status:'ready',filename:manifest.filename,partial:null,received:manifest.bytes});
+  sample.files.set(manifest.filename,'valid');
+  await sample.manager.check();
+  await sample.manager.check();
+  assert.equal(sample.manager.snapshot().phase,'ready');
+  assert.equal(sample.manager.snapshot().filename,manifest.filename);
+  assert.equal(sample.calls.filter(call=>call==='download').length,0);
+  assert.equal(sample.calls.filter(call=>call==='load').length,0);
+});
+
 test('manifest rejects untrusted origin, mutable revision and unsafe paths', () => {
   validateManifest(manifest);
   for (const patch of [{ url: 'http://example.com/model' }, { revision: 'main' }, { filename: '../bad.gguf' }, { bytes: NaN }]) {

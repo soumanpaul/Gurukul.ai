@@ -1,0 +1,13 @@
+Mode: built-in image_gen
+Reference: 15-splash-book.png
+Date: 2026-10-06
+
+Use case: precise-object-edit / ui-mockup. Edit the supplied Gurukul AI book splash. Preserve its warm cream watercolor paper, smiling open book sprout mascot, dark teal italic serif "Gurukul AI", exact subtitle "Your AI classroom", and subtle botanical bottom corners. Same full-bleed portrait aspect ratio, no phone frame.
+Requested change: below "Your AI classroom", after a modest clear gap, add FOUR vertically stacked feature rows, one icon then short text per row. Left-align all row text to a common axis; align all icons in a narrow column to its left. Center the entire group in the canvas. Comfortable spacing, readable dark teal sans-serif, clean polished colorful illustrated icons around the height of each row. No card boxes, no bullets or numbering, no extra paragraphs.
+Exact feature rows:
+1 colorful stack of subject textbooks (coral, blue, golden yellow) icon — "Add your subjects"
+2 colorful folder with notes/paper, teal and golden yellow — "Notes by subject"
+3 colorful violet quiz sheet with green checkmark and orange pencil — "Generate quizzes"
+4 friendly miniature white/cyan robot head with small coral chat bubble icon — "Clear doubts with free AI buddy"
+Fit the fourth label on one line if feasible at readable size, otherwise make a natural two-line wrap with text aligned to other labels. Do not omit "free". Each icon must clearly differ and communicate the matching feature.
+Rebalance vertically: shift existing mascot+brand group upward and slightly reduce its size to free room below the subtitle. Use the existing unused upper blank area rather than shrinking the feature copy. Aim mascot around 25–43% canvas height, wordmark and subtitle around 45–55%, four feature rows around 60–80%. Maintain generous upper whitespace and clear separation from bottom botanical artwork. Keep bottom decorations subtle and away from text. Preserve existing wording and style outside the added feature group. No CTA, loading indicator, model/technical information, extra slogans, phone chrome or other text. Deliver a finished portrait launch/welcome concept.

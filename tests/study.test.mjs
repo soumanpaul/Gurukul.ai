@@ -36,7 +36,7 @@ async function setup() {
 const answer = evidence => ({status:'answer',answer:'Plants use sunlight',citations:[{chunkId:evidence[0].chunkId,quote:'Plants use sunlight'}]});
 test('T3 upgrade, FTS syntax safety, notebook/selection/revision isolation',async()=>{
   const sample=await setup(); try {
-    assert.deepEqual(sample.connection.prepare('select version from schema_migrations order by version').all().map(row=>row.version),[1,2,3,4,5,6,7]);
+    assert.deepEqual(sample.connection.prepare('select version from schema_migrations order by version').all().map(row=>row.version),[1,2,3,4,5,6,7,8,9,10]);
     const other=randomUUID();await sample.imports.createNotebook(other,'Other');await sample.source('Hidden sunlight secret.',other);
     assert.equal((await sample.study.retrieve(sample.notebook,'sunlight OR "* NOT (')) .length,1);
     assert.deepEqual(await sample.study.retrieve(sample.notebook,'"*'),[]);

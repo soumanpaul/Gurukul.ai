@@ -1,6 +1,7 @@
 {
   "expo": {
-    "name": "Gurukul T0",
+    "name": "Gurukul AI",
+    "icon": "./assets/branding/robot-app-icon.png",
     "slug": "gurukul-t0",
     "version": "0.0.1",
     "platforms": ["ios", "android"],
