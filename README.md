@@ -192,3 +192,4 @@ This checks document links, required artifacts, skill metadata, and preservation
 ## Preserved inputs
 
 [Original research](docs/my-research/) and [SWE operating-system notes](docs/SWE_os.md) are unchanged. Their historical proposals are evidence to evaluate, not the current specification.
+# Gurukul.ai
